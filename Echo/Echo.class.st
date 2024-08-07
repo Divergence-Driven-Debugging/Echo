@@ -54,10 +54,29 @@ Echo >> good: anObject [
 	good := anObject
 ]
 
+{ #category : 'as yet unclassified' }
+Echo >> importBadRepository: aString baseline: aStringBaseline [
+
+	EchoLoader new
+		repository: aString;
+		baseline: aStringBaseline;
+		loadBad .
+]
+
+{ #category : 'as yet unclassified' }
+Echo >> importGoodRepository: aString baseline: aStringBaseline [
+
+	EchoLoader new
+		repository: aString;
+		baseline: aStringBaseline;
+		loadGood .
+]
+
 { #category : 'initialization' }
 Echo >> initialize [ 
 
 	algo := EchoAlgo new.
+
 ]
 
 { #category : 'accessing' }
