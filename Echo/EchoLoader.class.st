@@ -5,8 +5,9 @@ Class {
 		'baseline',
 		'repository'
 	],
-	#category : 'Echo',
-	#package : 'Echo'
+	#category : 'Echo-Core',
+	#package : 'Echo',
+	#tag : 'Core'
 }
 
 { #category : 'accessing' }
