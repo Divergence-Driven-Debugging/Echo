@@ -30,7 +30,7 @@ EchoLoader >> loadBad [
 	packages := packages collect: [ :p | p asPackage ].
 
 	packages do: [ :p |
-		p classes do: [ :c | c rename: c name , '_echo' ].
+		p classes do: [ :c | (ReRenameClassRefactoring rename: c name to: (c name , '_echo')) execute ].
 		p renameTo: p name , '_echo' ]
 ]
 
