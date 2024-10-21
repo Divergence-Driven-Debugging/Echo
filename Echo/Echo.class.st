@@ -40,8 +40,8 @@ Echo >> execute [
 	programmState good: interpreterGood bad: interpreterBad . 
 	algo good: interpreterGood bad: interpreterBad .
 "	1halt ."
-	[ interpreterGood isTerminated not or: [interpreterBad  isTerminated not ]] whileTrue: [ 
-	algo algoDiff.
+	[ interpreterGood isTerminated not and: [interpreterBad  isTerminated not ]] whileTrue: [ 
+	"algo algoDiff."
 	self step.
 	programmState collect].
 	^ programmState 

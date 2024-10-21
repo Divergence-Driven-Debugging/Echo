@@ -1,5 +1,5 @@
 Class {
-	#name : 'Candy',
+	#name : 'Candy_echo',
 	#superclass : 'Object',
 	#instVars : [
 		'sugar',
@@ -11,16 +11,16 @@ Class {
 }
 
 { #category : 'testing' }
-Candy >> candy [
+Candy_echo >> candy [
 
-	sugar := 10 .
+	sugar := 5 .
 	chocolate := self chocolat .
 	sugar > 5 ifTrue: [^ 'caramel' ].
 	^ 'chocolate'
 ]
 
 { #category : 'reflective operations' }
-Candy >> doesNotUnderstand: aMessage [
+Candy_echo >> doesNotUnderstand: aMessage [
 
 	^ 5 
 ]

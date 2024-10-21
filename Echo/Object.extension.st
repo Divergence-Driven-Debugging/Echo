@@ -1,6 +1,11 @@
 Extension { #name : 'Object' }
 
 { #category : '*Echo' }
+Object >> package [
+    ^ self class package
+]
+
+{ #category : '*Echo' }
 Object >> slotsValue [
 
 	| slotValue |
