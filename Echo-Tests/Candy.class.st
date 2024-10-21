@@ -14,7 +14,13 @@ Class {
 Candy >> candy [
 
 	sugar := 10 atRandom .
-	chocolate := 60 .
+	chocolate := self chocolat .
 	sugar > 5 ifTrue: [^ 'caramel' ].
 	^ 'chocolate'
+]
+
+{ #category : 'reflective operations' }
+Candy >> doesNotUnderstand: aMessage [
+
+	^ 5 
 ]

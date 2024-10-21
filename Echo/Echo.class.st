@@ -30,15 +30,21 @@ Echo >> bad: anObject [
 Echo >> execute [
 
 
-	
+	| programmState |
+"	1halt."
+	programmState := EchoCollectionState new.
 	interpreterGood := DASTInterpreter new.
 	interpreterGood initializeWithProgram: ((RBParser parseExpression: good)).
 	interpreterBad := DASTInterpreter new.
 	interpreterBad initializeWithProgram: ((RBParser parseExpression: bad)).
+	programmState good: interpreterGood bad: interpreterBad . 
 	algo good: interpreterGood bad: interpreterBad .
-	[ interpreterGood isTerminated not] whileTrue: [ 
+"	1halt ."
+	[ interpreterGood isTerminated not or: [interpreterBad  isTerminated not ]] whileTrue: [ 
 	algo algoDiff.
-	self step]
+	self step.
+	programmState collect].
+	^ programmState 
 
 ]
 
