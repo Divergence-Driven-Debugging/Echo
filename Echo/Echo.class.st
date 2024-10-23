@@ -14,6 +14,66 @@ Class {
 	#tag : 'Core'
 }
 
+{ #category : 'as yet unclassified' }
+Echo >> analyseDiv: programmState [
+
+	| asDiv messageDiv creationInstanceDiv |
+	1halt.
+	asDiv := self assignementDiv: programmState.
+	messageDiv := self messageDiv: programmState.
+	"creationInstanceDiv := self creationInstanceDiv: programmState."
+
+	asDiv do: [ :c |
+		'Divergence on assignement' traceCr.
+		'' traceCr.
+		'programm counter is equivalent on this node :' traceCr.
+		(c at: 3) traceCr.
+		'node is equivalent on this node :' traceCr.
+		(c at: 4) traceCr ].
+	messageDiv do: [ :c |
+		'' traceCr.
+		'Divergence on message' traceCr.
+		'' traceCr.
+		'programm counter is equivalent on this node :' traceCr.
+		(c at: 3) traceCr.
+		'node is equivalent on this node :' traceCr.
+		(c at: 4) traceCr ].
+	1 halt.
+	^ asDiv
+]
+
+{ #category : 'as yet unclassified' }
+Echo >> assignementDiv: programmState [
+
+	| goodState badState ttqGood solveGood ttqBad badSolve r assGood assBad r1 size |
+	goodState := programmState goodProgState.
+	badState := programmState badProgState.
+
+
+	ttqGood := TTQAllAssignments queryFrom: goodState.
+	solveGood := QSCollection solve: ttqGood.
+
+	ttqBad := TTQAllAssignments queryFrom: badState.
+	badSolve := QSCollection solve: ttqBad.
+
+	r := OrderedCollection new.
+	size := solveGood size max: badSolve size.
+	1 to: size do: [ :a |
+		assGood := solveGood at: a ifAbsent: [ DASTGoodMissing new ].
+		assBad := badSolve at: a ifAbsent: [ DASTBadMissing new ].
+		(assGood programCounter = assBad programCounter and: [
+			 assGood node isEquivalentTo: assBad node ]) ifFalse: [
+			r1 := OrderedCollection new.
+			r1 add: assGood.
+			r1 add: assBad.
+			r1 add: assGood programCounter = assBad programCounter.
+			r1 add: (assGood node isEquivalentTo: assBad node).
+			r add: r1 ] ].
+
+
+	^ r
+]
+
 { #category : 'accessing' }
 Echo >> bad [
 
@@ -24,6 +84,34 @@ Echo >> bad [
 Echo >> bad: anObject [
 
 	bad := anObject
+]
+
+{ #category : 'as yet unclassified' }
+Echo >> creationInstanceDiv: programmState [
+
+	| goodState badState ttqGood solveGood ttqBad badSolve r assGood assBad r1 size |
+	goodState := programmState goodProgState.
+	badState := programmState badProgState.
+
+	1halt.
+	ttqGood := TTQAllInstanceCreations queryFrom: goodState.
+	solveGood := QSCollection solve: ttqGood.
+
+	ttqBad := TTQAllInstanceCreations queryFrom: badState.
+	badSolve := QSCollection solve: ttqBad.
+
+	r := OrderedCollection new.
+	size :=  (solveGood size) max:( badSolve size). 
+	1 to: size do: [ :a |
+		assGood := solveGood at: a ifAbsent: [DASTGoodMissing new].
+		assBad := badSolve at: a ifAbsent: [DASTBadMissing new].
+		r1 := OrderedCollection new.
+		r1 add: assGood.
+		r1 add: assBad.
+		r1 add: assGood programCounter = assBad programCounter.
+		r1 add: (assGood node isEquivalentTo: assBad node).
+		r add: r1 ].
+	^ r
 ]
 
 { #category : 'executing' }
@@ -40,11 +128,11 @@ Echo >> execute [
 	programmState good: interpreterGood bad: interpreterBad . 
 	algo good: interpreterGood bad: interpreterBad .
 "	1halt ."
-	[ interpreterGood isTerminated not and: [interpreterBad  isTerminated not ]] whileTrue: [ 
+	[ interpreterGood isTerminated not or: [interpreterBad  isTerminated not ]] whileTrue: [ 
 	"algo algoDiff."
 	self step.
 	programmState collect].
-	^ programmState 
+	^ self analyseDiv: programmState 
 
 ]
 
@@ -85,6 +173,39 @@ Echo >> initialize [
 
 ]
 
+{ #category : 'as yet unclassified' }
+Echo >> messageDiv: programmState [
+
+	| goodState badState ttqGood solveGood ttqBad badSolve r assGood assBad r1 size |
+	goodState := programmState goodProgState.
+	badState := programmState badProgState.
+
+
+	ttqGood := TTQAllMessage queryFrom: goodState.
+	solveGood := QSCollection solve: ttqGood.
+
+	ttqBad := TTQAllMessage queryFrom: badState.
+	badSolve := QSCollection solve: ttqBad.
+	
+
+	r := OrderedCollection new.
+	size := solveGood size max: badSolve size.
+	1 to: size do: [ :a |
+		assGood := solveGood at: a ifAbsent: [ DASTGoodMissing new ].
+		assBad := badSolve at: a ifAbsent: [ DASTBadMissing new ].
+		(assGood programCounter = assBad programCounter and: [
+			 assGood node isEquivalentTo: assBad node ]) ifFalse: [
+			r1 := OrderedCollection new.
+			r1 add: assGood.
+			r1 add: assBad.
+			r1 add: assGood programCounter = assBad programCounter.
+			r1 add: (assGood node isEquivalentTo: assBad node).
+			r add: r1 ] ].
+
+
+	^ r
+]
+
 { #category : 'accessing' }
 Echo >> packages [
 	
@@ -100,12 +221,15 @@ Echo >> packages: anObject [
 { #category : 'executing' }
 Echo >> step [
 
-	((self packages includes: interpreterGood receiver package) or: [
-		 interpreterGood receiver = nil ])
-		ifTrue: [
-			interpreterGood stepInto.
-			interpreterBad stepInto ]
-		ifFalse: [
-			interpreterGood stepOver.
-			interpreterBad stepOver ]
+	interpreterGood isTerminated ifFalse: [
+		((self packages includes: interpreterGood receiver package) or: [
+			 interpreterGood receiver = nil ])
+			ifTrue: [ interpreterGood stepInto ]
+			ifFalse: [ interpreterGood stepOver ] ].
+
+	interpreterBad isTerminated ifFalse: [
+		((self packages includes: interpreterBad receiver package) or: [
+			 interpreterBad receiver = nil ])
+			ifTrue: [ interpreterBad stepInto ]
+			ifFalse: [ interpreterBad stepOver ] ]
 ]
