@@ -30,6 +30,30 @@ EchoDivergence >> modified: anObject [
 	modified := anObject
 ]
 
+{ #category : 'printing' }
+EchoDivergence >> printOn: str [
+
+	reference node isMessage ifTrue: [
+		str << '[Message] '.
+		str space.
+		str << reference node selector.
+		str << ' <-> '.
+		str << modified node selector.
+		^ self ].
+
+
+
+	str << '[Assignment] '.
+	str space.
+		str << reference node variable printString.
+		str << ': '.
+		str << reference node value printString.
+		str << ' <-> '.
+		str << modified node variable printString.
+		str << ': '.
+		str << modified node value printString.
+]
+
 { #category : 'accessing' }
 EchoDivergence >> reference [
 
