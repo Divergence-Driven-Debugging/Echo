@@ -42,11 +42,13 @@ EchoDebuggerPresenter >> defaultLayout [
 	| newLayout |
 	newLayout := SpBoxLayout newTopToBottom.
 	newLayout add: self buttonBar expand: false.
-	newLayout add: (SpBoxLayout newLeftToRight
-			 add: self referenceExecutionLayout;
-			 add: self divergencesList" expand: false";
-			 add: self modifiedExecutionLayout;
-			 yourself).
+	newLayout add: (SpPanedLayout newTopToBottom
+			 positionOfSlider: 30 percent;
+			 add: self divergencesList;
+			 add: (SpBoxLayout newLeftToRight
+					  add: self referenceExecutionLayout;
+					  add: self modifiedExecutionLayout;
+					  yourself)).
 	^ newLayout
 ]
 
