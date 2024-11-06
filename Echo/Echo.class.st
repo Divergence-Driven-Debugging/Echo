@@ -18,7 +18,7 @@ Class {
 Echo >> analyseDiv: programmState [
 
 	| asDiv messageDiv creationInstanceDiv result|
-	1halt.
+
 	result := OrderedCollection new.
 	asDiv := self assignementDiv: programmState.
 	messageDiv := self messageDiv: programmState.
@@ -64,7 +64,7 @@ Echo >> assignementDiv: programmState [
 		assGood := solveGood at: a ifAbsent: [ DASTGoodMissing new ].
 		assBad := badSolve at: a ifAbsent: [ DASTBadMissing new ].
 		(assGood programCounter = assBad programCounter and: [
-			 assGood node isEquivalentTo: assBad node ]) ifFalse: [
+			 assGood node isEquivalentTo: assBad node ]) ifFalse: ["1halt."
 			r1 := OrderedCollection new.
 			r1 add: assGood.
 			r1 add: assBad.
@@ -160,7 +160,7 @@ Echo >> divergenceConvergenceGood: solveGood bad: solveBad result: result shift:
 
 	| size assGood assBad r1 reconvGood reconvBad collectGood collectBad shift |
 	size := solveGood size max: solveBad size.
-	1halt.
+	
 	[solveGood isNotEmpty and:[ solveBad isNotEmpty ]] whileTrue: [  
 		assGood := solveGood at:1 ifAbsent: [ DASTGoodMissing new ].
 		assBad := solveBad at:1 ifAbsent: [ DASTBadMissing new ].
@@ -178,13 +178,13 @@ Echo >> divergenceConvergenceGood: solveGood bad: solveBad result: result shift:
 			reconvBad := solveBad select: [ :d |
 				             (d node isEquivalentTo: assGood node) and: [
 					             d programCounter - shift > assGood programCounter ] ].
-			reconvGood ifNotEmpty: [1halt.
+			reconvGood ifNotEmpty: [
 				collectGood := solveGood select: [ :d |
 					               d programCounter >= assGood programCounter and: [
 						               d programCounter
 						               < reconvGood first programCounter ] ].
 				collectGood do: [ :d | solveGood remove: d ] ].
-			reconvBad ifNotEmpty: [1halt.
+			reconvBad ifNotEmpty: [
 				collectBad := solveBad select: [ :d |
 					              d programCounter >= assBad programCounter and: [
 						              d programCounter < reconvGood first programCounter ] ].
@@ -195,7 +195,7 @@ Echo >> divergenceConvergenceGood: solveGood bad: solveBad result: result shift:
 				  divergenceConvergenceGood: solveGood
 				  bad: solveBad
 				  result: result
-				  shift: shift ].1halt.
+				  shift: shift ].
 		solveBad remove: assBad ifAbsent: [].
 		solveGood remove: assGood ifAbsent: [] ].
 	^ result
@@ -280,7 +280,6 @@ Echo >> messageDiv: programmState [
 
 	shift := 0.
 	r := OrderedCollection new.
-	1halt.
 	
 	^ self divergenceConvergenceGood: solveGood bad: badSolve result: r shift: shift
 ]
