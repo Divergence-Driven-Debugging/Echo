@@ -53,8 +53,7 @@ EchoDebuggerPresenter >> defaultLayout [
 { #category : 'layout' }
 EchoDebuggerPresenter >> divergencesList [
 
-	divergencesList := self newList.
-	^divergencesList 
+	^ divergencesList
 ]
 
 { #category : 'initialize' }
@@ -70,6 +69,7 @@ EchoDebuggerPresenter >> initializeEventsBetweenStack: stack andCode: code [
 { #category : 'initialize' }
 EchoDebuggerPresenter >> initializePresenters [
 	divergencesList := self newList.
+	divergencesList activateOnDoubleClick whenActivatedDo: [ :div | div selectedItem inspect ].
 		
 	modifiedStack := self newList.	
 	modifiedCode := self newCode.
