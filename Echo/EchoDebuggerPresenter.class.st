@@ -44,7 +44,7 @@ EchoDebuggerPresenter >> defaultLayout [
 	newLayout add: self buttonBar expand: false.
 	newLayout add: (SpBoxLayout newLeftToRight
 			 add: self referenceExecutionLayout;
-			 add: self divergencesList expand: false;
+			 add: self divergencesList" expand: false";
 			 add: self modifiedExecutionLayout;
 			 yourself).
 	^ newLayout
@@ -70,6 +70,11 @@ EchoDebuggerPresenter >> initializeEventsBetweenStack: stack andCode: code [
 EchoDebuggerPresenter >> initializePresenters [
 	divergencesList := self newList.
 	divergencesList activateOnDoubleClick whenActivatedDo: [ :div | div selectedItem inspect ].
+	"divergencesList display:  [ :div | div printString ]."
+	divergencesList transmitDo: [ :div |
+		div ifNotNil:[
+		referenceStack selectItem:  div reference state scrollToSelection: true.
+		modifiedStack selectItem: div modified state scrollToSelection: true]].
 		
 	modifiedStack := self newList.	
 	modifiedCode := self newCode.
