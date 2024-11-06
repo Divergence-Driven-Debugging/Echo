@@ -23,22 +23,6 @@ Echo >> analyseDiv: programmState [
 	asDiv := self assignementDiv: programmState.
 	messageDiv := self messageDiv: programmState.
 	"creationInstanceDiv := self creationInstanceDiv: programmState."
-
-	asDiv do: [ :c |
-		'Divergence on assignement' traceCr.
-		'' traceCr.
-		'programm counter is equivalent on this node :' traceCr.
-		(c at: 3) traceCr.
-		'node is equivalent on this node :' traceCr.
-		(c at: 4) traceCr ].
-	messageDiv do: [ :c |
-		'' traceCr.
-		'Divergence on message' traceCr.
-		'' traceCr.
-		'programm counter is equivalent on this node :' traceCr.
-		(c at: 3) traceCr.
-		'node is equivalent on this node :' traceCr.
-		(c at: 4) traceCr ].
 	result addAll: messageDiv .
 	result addAll: asDiv .
 	^ result
@@ -64,12 +48,9 @@ Echo >> assignementDiv: programmState [
 		assGood := solveGood at: a ifAbsent: [ DASTGoodMissing new ].
 		assBad := badSolve at: a ifAbsent: [ DASTBadMissing new ].
 		(assGood programCounter = assBad programCounter and: [
-			 assGood node isEquivalentTo: assBad node ]) ifFalse: ["1halt."
-			r1 := OrderedCollection new.
-			r1 add: assGood.
-			r1 add: assBad.
-			r1 add: assGood programCounter = assBad programCounter.
-			r1 add: (assGood node isEquivalentTo: assBad node).
+			 assGood node isEquivalentTo: assBad node ]) ifFalse: [ "1halt."
+			r1 := EchoDivergence reference: assGood modified: assBad.
+
 			r add: r1 ] ].
 
 
@@ -166,11 +147,7 @@ Echo >> divergenceConvergenceGood: solveGood bad: solveBad result: result shift:
 		assBad := solveBad at:1 ifAbsent: [ DASTBadMissing new ].
 		(assGood programCounter - baseShift = assBad programCounter and: [
 			 assGood node isEquivalentTo: assBad node ]) ifFalse: [
-			r1 := OrderedCollection new.
-			r1 add: assGood.
-			r1 add: assBad.
-			r1 add: assGood programCounter = assBad programCounter.
-			r1 add: (assGood node isEquivalentTo: assBad node).
+			r1 := EchoDivergence reference: assGood modified: assBad.
 			shift := assGood programCounter - assBad programCounter.
 			reconvGood := solveGood select: [ :d |
 				              (d node isEquivalentTo: assBad node) and: [

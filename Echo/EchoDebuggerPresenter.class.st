@@ -44,7 +44,7 @@ EchoDebuggerPresenter >> defaultLayout [
 	newLayout add: self buttonBar expand: false.
 	newLayout add: (SpBoxLayout newLeftToRight
 			 add: self referenceExecutionLayout;
-			" add: self divergencesList expand: false;"
+			 add: self divergencesList expand: false;
 			 add: self modifiedExecutionLayout;
 			 yourself).
 	^ newLayout
