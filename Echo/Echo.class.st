@@ -108,11 +108,8 @@ Echo >> divergenceConvergenceGood: solveGood bad: solveBad result: result [
 		assBad := solveBad at: a ifAbsent: [ 1halt. DASTBadMissing new ].
 		(assGood programCounter + shift = assBad programCounter and: [
 			 assGood node isEquivalentTo: assBad node ]) ifFalse: [
-			r1 := OrderedCollection new.
-			r1 add: assGood.
-			r1 add: assBad.
-			r1 add: assGood programCounter = assBad programCounter.
-			r1 add: (assGood node isEquivalentTo: assBad node).
+			r1 := EchoDivergence reference: assGood modified: assBad.
+			
 			shift := assGood programCounter - assBad programCounter.
 			reconvGood := solveGood select: [ :d |
 				              (d node isEquivalentTo: assBad node) and: [
