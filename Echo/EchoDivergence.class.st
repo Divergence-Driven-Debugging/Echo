@@ -6,7 +6,8 @@ Class {
 	#superclass : 'Object',
 	#instVars : [
 		'reference',
-		'modified'
+		'modified',
+		'shift'
 	],
 	#category : 'Echo-Core',
 	#package : 'Echo',
@@ -16,6 +17,22 @@ Class {
 { #category : 'instance creation' }
 EchoDivergence class >> reference: ref modified: mod [
 	^self new reference: ref modified: mod
+]
+
+{ #category : 'instance creation' }
+EchoDivergence class >> reference: ref modified: mod shift: shift [
+
+	^ self new
+		  reference: ref;
+		  modified: mod;
+		  shift: shift;
+		  yourself
+]
+
+{ #category : 'initialization' }
+EchoDivergence >> initialize [ 
+
+shift:=0.
 ]
 
 { #category : 'accessing' }
@@ -70,4 +87,18 @@ EchoDivergence >> reference: anObject [
 EchoDivergence >> reference: ref modified: mod [
 	reference := ref.
 	modified := mod
+]
+
+{ #category : 'accessing' }
+EchoDivergence >> shift [
+
+	^ shift
+]
+
+{ #category : 'accessing' }
+EchoDivergence >> shift: anObject [
+
+	shift := anObject .
+	shift ifNil: [ shift := 0 ]
+	
 ]

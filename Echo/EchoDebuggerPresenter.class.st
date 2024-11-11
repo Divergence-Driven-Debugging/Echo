@@ -70,29 +70,40 @@ EchoDebuggerPresenter >> initializeEventsBetweenStack: stack andCode: code [
 
 { #category : 'initialize' }
 EchoDebuggerPresenter >> initializePresenters [
+
 	divergencesList := self newList.
-	divergencesList activateOnDoubleClick whenActivatedDo: [ :div | div selectedItem inspect ].
+	divergencesList activateOnDoubleClick whenActivatedDo: [ :div |
+		div selectedItem inspect ].
 	"divergencesList display:  [ :div | div printString ]."
-	divergencesList transmitDo: [ :div |
-		div ifNotNil:[
-		referenceStack selectItem:  div reference state scrollToSelection: true.
-		modifiedStack selectItem: div modified state scrollToSelection: true]].
-		
-	modifiedStack := self newList.	
+	
+
+	modifiedStack := self newList.
 	modifiedCode := self newCode.
 	modifiedCode beNotEditable.
-	self initializeEventsBetweenStack: modifiedStack andCode: modifiedCode.
-	
+	self
+		initializeEventsBetweenStack: modifiedStack
+		andCode: modifiedCode.
+
 	referenceStack := self newList.
 	referenceCode := self newCode.
 	referenceCode beNotEditable.
-	self initializeEventsBetweenStack: referenceStack andCode: referenceCode.
-	
+	self
+		initializeEventsBetweenStack: referenceStack
+		andCode: referenceCode.
+
 	referenceStack items: echo first.
 	referenceStack selectFirst.
 	modifiedStack items: echo second.
 	modifiedStack selectFirst.
 	divergencesList items: echo last.
+	divergencesList transmitDo: [ :div |
+		div ifNotNil: [1haltOnce. 
+			referenceStack
+				selectItem: (div reference state ifNil: [0]) 
+				scrollToSelection: true.
+			modifiedStack
+				selectItem: (div selectItem: modifiedStack )
+				scrollToSelection: true ] ].
 ]
 
 { #category : 'layout' }

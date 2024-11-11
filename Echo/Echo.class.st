@@ -43,18 +43,23 @@ Echo >> assignementDiv: programmState [
 	badSolve := QSCollection solve: ttqBad.
 
 	r := OrderedCollection new.
-	size := solveGood size max: badSolve size.
+	
+	^ self divergenceAssignementGood: solveGood bad: badSolve result: r shift: 0.
+	
+	"size := solveGood size max: badSolve size.
 	1 to: size do: [ :a |
 		assGood := solveGood at: a ifAbsent: [ DASTGoodMissing new ].
 		assBad := badSolve at: a ifAbsent: [ DASTBadMissing new ].
 		(assGood programCounter = assBad programCounter and: [
-			 assGood node isEquivalentTo: assBad node ]) ifFalse: [ "1halt."
-			r1 := EchoDivergence reference: assGood modified: assBad.
+			 assGood node isEquivalentTo: assBad node ]) ifFalse: [ 1halt.
+			assGoodReconv := badSolve select: [ :ps |ps node isEquivalentTo: assGood node ] first.
+			assBadReconv := (solveGood select: [ :ps |ps node isEquivalentTo: assBad node ] first).
+			r1 := EchoDivergenceAssign reference: assGood modified: assBad.
 
 			r add: r1 ] ].
 
 
-	^ r
+	^ r"
 ]
 
 { #category : 'accessing' }
@@ -98,6 +103,82 @@ Echo >> creationInstanceDiv: programmState [
 ]
 
 { #category : 'as yet unclassified' }
+Echo >> divergenceAssignementGood: solveGood bad: solveBad result: result shift: baseShift [
+
+	| assGood assBad reconvGood reconvBad shift |
+	1halt.
+	shift := 0.
+	[ solveGood isNotEmpty or: [ solveBad isNotEmpty ] ] whileTrue: [
+		assGood := solveGood at: 1 ifAbsent: [ DASTGoodMissing new ].
+		assBad := solveBad at: 1 ifAbsent: [ DASTBadMissing new ].
+		(assGood programCounter - baseShift = assBad programCounter and: [
+			 assGood node isEquivalentTo: assBad node ]) ifTrue: [ solveGood remove: assGood.
+			solveBad remove: assBad ] ifFalse: [
+			(assGood node isEquivalentTo: assBad node)
+				ifTrue: [
+					result add: (EchoDivergenceAssign
+							 reference: assGood
+							 modified: assBad
+							 flow: true
+							 state: false).
+					solveBad remove: assBad.
+					solveGood remove: assGood.
+					self
+						divergenceAssignementGood: solveGood
+						bad: solveBad
+						result: result
+						shift: assGood programCounter - assBad programCounter ]
+				ifFalse: [
+					reconvGood := (solveBad select:
+						              [ :ps | ps node isEquivalentTo: assGood node ])
+							              at: 1 ifAbsent: [ nil ] .
+					reconvBad := (solveGood select:
+						             [ :ps | ps node isEquivalentTo: assBad node ] )at: 1 ifAbsent: [ nil ].
+					reconvGood
+						ifNil: [
+							result add:  (EchoDivergenceAssign
+								reference: assGood 
+								modified:  DASTBadMissing new 
+								flow: true
+								state: true) .
+								solveGood remove: assGood ]
+						ifNotNil: [
+							result add: (EchoDivergenceAssign
+								reference: assGood
+								modified: reconvGood
+								flow: true
+								state: false).
+							solveGood remove: assGood.
+							solveBad remove: reconvGood.
+							shift := shift max:
+								         assGood programCounter - reconvGood programCounter ].
+					reconvBad
+						ifNil: [
+							result add: (EchoDivergenceAssign
+								reference: DASTGoodMissing new
+								modified:  assBad 
+								flow: true
+								state: true ).
+								solveBad remove: assBad ]
+						ifNotNil: [
+							result add: (EchoDivergenceAssign
+								reference: reconvBad
+								modified: assBad
+								flow: true
+								state: false).
+							solveGood remove: reconvBad.
+							solveBad remove: assBad.
+							shift := shift max:
+								         reconvBad programCounter - assBad programCounter ].
+					self
+						divergenceAssignementGood: solveGood
+						bad: solveBad
+						result: result
+						shift: shift ] ] ].
+	^ result
+]
+
+{ #category : 'as yet unclassified' }
 Echo >> divergenceConvergenceGood: solveGood bad: solveBad result: result [
 
 	| size assGood assBad shift r1 reconvGood reconvBad collectGood collectBad  |
@@ -108,7 +189,7 @@ Echo >> divergenceConvergenceGood: solveGood bad: solveBad result: result [
 		assBad := solveBad at: a ifAbsent: [ 1halt. DASTBadMissing new ].
 		(assGood programCounter + shift = assBad programCounter and: [
 			 assGood node isEquivalentTo: assBad node ]) ifFalse: [
-			r1 := EchoDivergence reference: assGood modified: assBad.
+			r1 := EchoDivergenceMessage reference: assGood modified: assBad.
 			
 			shift := assGood programCounter - assBad programCounter.
 			reconvGood := solveGood select: [ :d |
@@ -138,13 +219,16 @@ Echo >> divergenceConvergenceGood: solveGood bad: solveBad result: result shift:
 
 	| size assGood assBad r1 reconvGood reconvBad collectGood collectBad shift |
 	size := solveGood size max: solveBad size.
-	
-	[solveGood isNotEmpty and:[ solveBad isNotEmpty ]] whileTrue: [  
-		assGood := solveGood at:1 ifAbsent: [ DASTGoodMissing new ].
-		assBad := solveBad at:1 ifAbsent: [ DASTBadMissing new ].
+
+	[ solveGood isNotEmpty and: [ solveBad isNotEmpty ] ] whileTrue: [
+		assGood := solveGood at: 1 ifAbsent: [ DASTGoodMissing new ].
+		assBad := solveBad at: 1 ifAbsent: [ DASTBadMissing new ].
 		(assGood programCounter - baseShift = assBad programCounter and: [
-			 assGood node isEquivalentTo: assBad node ]) ifFalse: [
-			r1 := EchoDivergence reference: assGood modified: assBad.
+			 assGood node isEquivalentTo: assBad node ]) ifFalse: [shift := assGood programCounter - assBad programCounter.
+			r1 := EchoDivergenceMessage
+				      reference: assGood
+				      modified: assBad
+				      shift: shift.
 			shift := assGood programCounter - assBad programCounter.
 			reconvGood := solveGood select: [ :d |
 				              (d node isEquivalentTo: assBad node) and: [
@@ -157,21 +241,24 @@ Echo >> divergenceConvergenceGood: solveGood bad: solveBad result: result shift:
 					               d programCounter >= assGood programCounter and: [
 						               d programCounter
 						               < reconvGood first programCounter ] ].
-				collectGood do: [ :d | solveGood remove: d ] ].
+				collectGood do: [ :d | solveGood remove: d ].
+				shift := reconvGood first programCounter - assBad programCounter ].
 			reconvBad ifNotEmpty: [
 				collectBad := solveBad select: [ :d |
 					              d programCounter >= assBad programCounter and: [
 						              d programCounter < reconvGood first programCounter ] ].
-				collectBad do: [ :d | solveBad remove: d ] ].
-			shift := assGood programCounter - assBad programCounter.
+				collectBad do: [ :d | solveBad remove: d ].
+				shift := assGood programCounter - reconvBad first programCounter ].
+			r1 collectGood: collectGood .
+			r1 collectBad: collectBad .
 			result add: r1.
 			^ self
 				  divergenceConvergenceGood: solveGood
 				  bad: solveBad
 				  result: result
 				  shift: shift ].
-		solveBad remove: assBad ifAbsent: [].
-		solveGood remove: assGood ifAbsent: [] ].
+		solveBad remove: assBad ifAbsent: [  ].
+		solveGood remove: assGood ifAbsent: [  ] ].
 	^ result
 ]
 
