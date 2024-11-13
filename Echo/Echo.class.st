@@ -17,7 +17,7 @@ Class {
 { #category : 'as yet unclassified' }
 Echo >> analyseDiv: programmState [
 
-	| asDiv messageDiv creationInstanceDiv result|
+	| asDiv messageDiv creationInstanceDiv result returnDiv |
 
 	result := OrderedCollection new.
 	asDiv := self assignementDiv: programmState.
@@ -179,42 +179,6 @@ Echo >> divergenceAssignementGood: solveGood bad: solveBad result: result shift:
 ]
 
 { #category : 'as yet unclassified' }
-Echo >> divergenceConvergenceGood: solveGood bad: solveBad result: result [
-
-	| size assGood assBad shift r1 reconvGood reconvBad collectGood collectBad  |
-	1halt.
-	size := solveGood size max: solveBad size.
-	1 to: size do: [ :a |
-		assGood := solveGood at: a ifAbsent: [ 1halt. DASTGoodMissing new ].
-		assBad := solveBad at: a ifAbsent: [ 1halt. DASTBadMissing new ].
-		(assGood programCounter + shift = assBad programCounter and: [
-			 assGood node isEquivalentTo: assBad node ]) ifFalse: [
-			r1 := EchoDivergenceMessage reference: assGood modified: assBad.
-			
-			shift := assGood programCounter - assBad programCounter.
-			reconvGood := solveGood select: [ :d |
-				              (d node isEquivalentTo: assBad node) and: [
-					              d programCounter - shift > assBad programCounter ] ].
-			reconvBad := solveBad select: [ :d |
-				             (d node isEquivalentTo: assGood node) and: [
-					             d programCounter - shift > assGood programCounter ] ].
-			reconvGood ifNotEmpty: [
-				collectGood := solveGood select: [ :d |
-					               d programCounter >= assGood programCounter and: [
-						               d programCounter
-						               < reconvGood first programCounter ] ].
-				collectGood do: [ :d | solveGood remove: d ] .1halt.].
-			reconvBad ifNotEmpty: [
-				collectBad := solveBad select: [ :d |
-					              d programCounter >= assBad programCounter and: [
-						              d programCounter < reconvGood first programCounter ] ].
-				collectBad do: [ :d | solveBad remove: d ] ].
-			result add: r1 ] .
-		size := solveGood size max: solveBad size.].
-	^ result.
-]
-
-{ #category : 'as yet unclassified' }
 Echo >> divergenceConvergenceGood: solveGood bad: solveBad result: result shift: baseShift [
 
 	| size assGood assBad r1 reconvGood reconvBad collectGood collectBad shift |
@@ -257,6 +221,64 @@ Echo >> divergenceConvergenceGood: solveGood bad: solveBad result: result shift:
 				  bad: solveBad
 				  result: result
 				  shift: shift ].
+		solveBad remove: assBad ifAbsent: [  ].
+		solveGood remove: assGood ifAbsent: [  ] ].
+	^ result
+]
+
+{ #category : 'as yet unclassified' }
+Echo >> divergenceConvergenceGood: solveGood bad: solveBad result: result shift: baseShift goodReturn: goodReturn badReturn: badReturn [
+
+	| size assGood assBad r1 reconvGood reconvBad collectGood collectBad shift |
+	size := solveGood size max: solveBad size.
+	1 halt.
+	[ solveGood isNotEmpty and: [ solveBad isNotEmpty ] ] whileTrue: [
+		assGood := solveGood at: 1 ifAbsent: [ DASTGoodMissing new ].
+		assBad := solveBad at: 1 ifAbsent: [ DASTBadMissing new ].
+		(assGood programCounter - baseShift = assBad programCounter and: [
+			 (assGood node isEquivalentTo: assBad node) and: [
+				 assGood state dnu = assBad state dnu ] ]) ifFalse: [
+			shift := assGood programCounter - assBad programCounter.
+			r1 := EchoDivergenceMessage
+				      reference: assGood
+				      modified: assBad
+				      shift: shift.
+			shift := assGood programCounter - assBad programCounter.
+			reconvGood := solveGood select: [ :d |
+				              (d node isEquivalentTo: assBad node) and: [
+					              d programCounter - shift > assBad programCounter ] ].
+			reconvBad := solveBad select: [ :d |
+				             (d node isEquivalentTo: assGood node) and: [
+					             d programCounter - shift > assGood programCounter ] ].
+			reconvGood ifNotEmpty: [
+				collectGood := solveGood select: [ :d |
+					               d programCounter >= assGood programCounter and: [
+						               d programCounter
+						               < reconvGood first programCounter ] ].
+				collectGood do: [ :d | solveGood remove: d ].
+				self removeReturn: goodReturn divergence: collectGood.
+				shift := reconvGood first programCounter - assBad programCounter ].
+			reconvBad ifNotEmpty: [
+				collectBad := solveBad select: [ :d |
+					              d programCounter >= assBad programCounter and: [
+						              d programCounter < reconvGood first programCounter ] ].
+				collectBad do: [ :d | solveBad remove: d ].
+				self removeReturn: badReturn divergence: collectBad.
+				shift := assGood programCounter - reconvBad first programCounter ].
+			r1 collectGood: collectGood.
+			r1 collectBad: collectBad.
+			result add: r1.
+			(reconvGood isEmpty and: reconvBad isEmpty) ifTrue: [
+				solveBad remove: assBad ifAbsent: [  ].
+				solveGood remove: assGood ifAbsent: [  ] ].
+
+			^ self
+				  divergenceConvergenceGood: solveGood
+				  bad: solveBad
+				  result: result
+				  shift: shift
+				  goodReturn: goodReturn
+				  badReturn: badReturn ].
 		solveBad remove: assBad ifAbsent: [  ].
 		solveGood remove: assGood ifAbsent: [  ] ].
 	^ result
@@ -328,7 +350,7 @@ Echo >> initialize [
 { #category : 'as yet unclassified' }
 Echo >> messageDiv: programmState [
 
-	| goodState badState ttqGood solveGood ttqBad badSolve r shift |
+	| goodState badState ttqGood solveGood ttqBad badSolve r shift ttqGoodReturn solveGoodReturn ttqBadReturn solveBadReturn |
 	goodState := programmState goodProgState.
 	badState := programmState badProgState.
 
@@ -338,11 +360,19 @@ Echo >> messageDiv: programmState [
 
 	ttqBad := TTQAllMessage queryFrom: badState.
 	badSolve := QSCollection solve: ttqBad.
+	
+	ttqGoodReturn := TTQAllReturn queryFrom: goodState.
+	solveGoodReturn := QSCollection solve: ttqGoodReturn.
+
+	ttqBadReturn := TTQAllReturn queryFrom: badState.
+	solveBadReturn := QSCollection solve: ttqBadReturn.
 
 	shift := 0.
 	r := OrderedCollection new.
 	
-	^ self divergenceConvergenceGood: solveGood bad: badSolve result: r shift: shift
+	self divergenceConvergenceGood: solveGood bad: badSolve result: r shift: shift goodReturn: solveGoodReturn badReturn: solveBadReturn .
+		self returnDivGood: solveGoodReturn bad: solveBadReturn .
+	^r 
 ]
 
 { #category : 'accessing' }
@@ -355,6 +385,25 @@ Echo >> packages [
 Echo >> packages: anObject [
 
 	packages := anObject
+]
+
+{ #category : 'removing' }
+Echo >> removeReturn: return divergence: diverge [
+
+	|result|
+	1halt.
+	
+	result :=OrderedCollection new.
+	diverge  do: [ :d | return  select: [:r |  (r state currentContext messageNode ifNil: [DASTNilNode new]) isEquivalentTo:(d node) ] thenDo: [ :r | result add: r ] ].
+	result removeDuplicates .
+	result do: [ :r | return remove: r ].
+	1halt.
+]
+
+{ #category : 'as yet unclassified' }
+Echo >> returnDivGood: goodReturn bad: badReturn [ 
+
+	1halt.
 ]
 
 { #category : 'executing' }

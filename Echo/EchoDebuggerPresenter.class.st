@@ -102,7 +102,7 @@ EchoDebuggerPresenter >> initializePresenters [
 				selectItem: (div reference state ifNil: [0]) 
 				scrollToSelection: true.
 			modifiedStack
-				selectItem: (div selectItem: modifiedStack )
+				selectItem: (div modified state ifNil: [0]  )
 				scrollToSelection: true ] ].
 ]
 

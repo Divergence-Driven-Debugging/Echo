@@ -38,7 +38,8 @@ EchoCollectionState >> badProgState: anObject [
 
 { #category : 'as yet unclassified' }
 EchoCollectionState >> collect [
-	
+	goodInterpret isDNU ifTrue: [ goodProgState last dnu: true. goodInterpret dnu: false ] .
+	badInterpret isDNU ifTrue: [ badProgState last dnu: true. badInterpret dnu: false ] .
 	goodProgState add: ( DASTProgrammState new state: goodInterpret ).
 	badProgState add: ( DASTProgrammState new state: badInterpret).
 ]
