@@ -40,6 +40,10 @@ EchoCollectionState >> badProgState: anObject [
 EchoCollectionState >> collect [
 	goodInterpret isDNU ifTrue: [ goodProgState last dnu: true. goodInterpret dnu: false ] .
 	badInterpret isDNU ifTrue: [ badProgState last dnu: true. badInterpret dnu: false ] .
+	
+	goodInterpret returnValue ifNotNil: [ goodProgState last returnValue: goodInterpret returnValue . goodInterpret returnValue: nil ] .
+	badInterpret returnValue ifNotNil: [ badProgState last returnValue: badInterpret returnValue . badInterpret returnValue: nil ] .
+	
 	goodProgState add: ( DASTProgrammState new state: goodInterpret ).
 	badProgState add: ( DASTProgrammState new state: badInterpret).
 ]

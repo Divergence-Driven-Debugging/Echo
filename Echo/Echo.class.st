@@ -401,9 +401,29 @@ Echo >> removeReturn: return divergence: diverge [
 ]
 
 { #category : 'as yet unclassified' }
-Echo >> returnDivGood: goodReturn bad: badReturn [ 
+Echo >> returnDivGood: goodReturn bad: badReturn [
 
-	1halt.
+	| returnGood returnBad result |
+	1 halt.
+	result := OrderedCollection new.
+	[goodReturn isNotEmpty or: [ goodReturn isNotEmpty ]] whileTrue: [
+		returnGood := goodReturn at: 1 ifAbsent: [ DASTGoodMissing new ].
+		returnBad := badReturn at: 1 ifAbsent: [ DASTBadMissing new ].
+		((returnGood node isEquivalentTo: returnBad node) and: [
+			 returnGood state returnValue = returnBad state returnValue ]) ifFalse: [
+			(returnGood node isEquivalentTo: returnBad node)
+				ifTrue: [
+					result add: (EchoDivergenceReturn new
+							 returnGood: returnGood;
+							 returnBad: returnBad;
+							 yourself) ]
+				ifFalse: [ 
+					1halt.
+					
+					 ]
+				
+				
+				 ] ]
 ]
 
 { #category : 'executing' }
