@@ -107,6 +107,14 @@ EchoDebuggerPresenter >> initializePresenters [
 ]
 
 { #category : 'layout' }
+EchoDebuggerPresenter >> initializeWindow: aWindowPresenter [
+
+	aWindowPresenter
+		title: self title;
+		initialExtent: 700 @ 600
+]
+
+{ #category : 'layout' }
 EchoDebuggerPresenter >> modifiedExecutionLayout [
 
 	^ SpBoxLayout newTopToBottom	
@@ -129,6 +137,15 @@ EchoDebuggerPresenter >> referenceExecutionLayout [
 { #category : 'initialize' }
 EchoDebuggerPresenter >> setModelBeforeInitialization: anEchoDebuggingResult [
 	echo := anEchoDebuggingResult
+]
+
+{ #category : 'layout' }
+EchoDebuggerPresenter >> title [
+
+	^ String streamContents: [ :str |
+		  str << echo last size printString.
+		  str space.
+		  str << 'divergences detected' ]
 ]
 
 { #category : 'initialize' }
