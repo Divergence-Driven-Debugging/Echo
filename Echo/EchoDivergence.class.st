@@ -32,7 +32,8 @@ EchoDivergence class >> reference: ref modified: mod shift: shift [
 { #category : 'initialization' }
 EchoDivergence >> initialize [ 
 
-shift:=0.
+	reference := DASTGoodMissing new.
+	modified := DASTBadMissing  new.
 ]
 
 { #category : 'accessing' }

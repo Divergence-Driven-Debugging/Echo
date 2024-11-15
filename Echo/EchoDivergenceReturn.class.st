@@ -1,35 +1,66 @@
 Class {
 	#name : 'EchoDivergenceReturn',
 	#superclass : 'EchoDivergence',
-	#instVars : [
-		'returnGood',
-		'returnBad'
-	],
 	#category : 'Echo-Core',
 	#package : 'Echo',
 	#tag : 'Core'
 }
 
+{ #category : 'printing' }
+EchoDivergenceReturn >> printBadReturn: str [
+
+	modified state ifNotNil: [ 
+		
+		str space.
+		str <<  modified  state currentContext messageNode printString .
+		str << ': '.
+		str <<  modified state returnValue printString .
+		]
+	
+]
+
+{ #category : 'printing' }
+EchoDivergenceReturn >> printGoodReturn: str [
+
+	reference state ifNotNil: [ 
+		
+		str space.
+		str <<  reference  state currentContext messageNode printString .
+		str << ': '.
+		str <<  reference state returnValue printString .
+		]
+	
+]
+
+{ #category : 'printing' }
+EchoDivergenceReturn >> printOn: str [
+
+	str << '[Return] '.
+	self printGoodReturn: str.
+	self printBadReturn: str.
+	
+]
+
 { #category : 'accessing' }
 EchoDivergenceReturn >> returnBad [
 
-	^ returnBad
+	^ reference
 ]
 
 { #category : 'accessing' }
 EchoDivergenceReturn >> returnBad: anObject [
 
-	returnBad := anObject
+	modified := anObject
 ]
 
 { #category : 'accessing' }
 EchoDivergenceReturn >> returnGood [
 
-	^ returnGood
+	^ reference 
 ]
 
 { #category : 'accessing' }
 EchoDivergenceReturn >> returnGood: anObject [
 
-	returnGood := anObject
+	reference := anObject
 ]

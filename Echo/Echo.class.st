@@ -135,13 +135,13 @@ Echo >> divergenceAssignementGood: solveGood bad: solveBad result: result shift:
 					reconvBad := (solveGood select:
 						             [ :ps | ps node isEquivalentTo: assBad node ] )at: 1 ifAbsent: [ nil ].
 					reconvGood
-						ifNil: [
+						ifNil: [(assGood class = DASTBadMissing )ifFalse: [ 
 							result add:  (EchoDivergenceAssign
 								reference: assGood 
 								modified:  DASTBadMissing new 
 								flow: true
 								state: true) .
-								solveGood remove: assGood ]
+								solveGood remove: assGood ]]
 						ifNotNil: [
 							result add: (EchoDivergenceAssign
 								reference: assGood
@@ -153,13 +153,13 @@ Echo >> divergenceAssignementGood: solveGood bad: solveBad result: result shift:
 							shift := shift max:
 								         assGood programCounter - reconvGood programCounter ].
 					reconvBad
-						ifNil: [
+						ifNil: [(assBad class = DASTBadMissing )ifFalse: [ 
 							result add: (EchoDivergenceAssign
 								reference: DASTGoodMissing new
 								modified:  assBad 
 								flow: true
 								state: true ).
-								solveBad remove: assBad ]
+								solveBad remove: assBad ]]
 						ifNotNil: [
 							result add: (EchoDivergenceAssign
 								reference: reconvBad
@@ -371,7 +371,7 @@ Echo >> messageDiv: programmState [
 	r := OrderedCollection new.
 	
 	self divergenceConvergenceGood: solveGood bad: badSolve result: r shift: shift goodReturn: solveGoodReturn badReturn: solveBadReturn .
-		self returnDivGood: solveGoodReturn bad: solveBadReturn .
+		r addAll:(self  returnDivGood: solveGoodReturn bad: solveBadReturn) .
 	^r 
 ]
 
@@ -391,43 +391,75 @@ Echo >> packages: anObject [
 Echo >> removeReturn: return divergence: diverge [
 
 	|result|
-	1halt.
+"	1halt.
 	
 	result :=OrderedCollection new.
 	diverge  do: [ :d | return  select: [:r |  (r state currentContext messageNode ifNil: [DASTNilNode new]) isEquivalentTo:(d node) ] thenDo: [ :r | result add: r ] ].
 	result removeDuplicates .
 	result do: [ :r | return remove: r ].
-	1halt.
+	1halt."
 ]
 
 { #category : 'as yet unclassified' }
 Echo >> returnDivGood: goodReturn bad: badReturn [
 
-	| returnGood returnBad result |
+	| returnGood returnBad result checkReturnGood checkReturnBad |
 	1 halt.
 	result := OrderedCollection new.
-	[goodReturn isNotEmpty or: [ goodReturn isNotEmpty ]] whileTrue: [
+	[ goodReturn isNotEmpty or: [ goodReturn isNotEmpty ] ] whileTrue: [
 		returnGood := goodReturn at: 1 ifAbsent: [ DASTGoodMissing new ].
 		returnBad := badReturn at: 1 ifAbsent: [ DASTBadMissing new ].
 		((returnGood node isEquivalentTo: returnBad node) and: [
-			 returnGood state returnValue = returnBad state returnValue ]) ifFalse: [
-			(returnGood node isEquivalentTo: returnBad node)
-				ifTrue: [
-					result add: (EchoDivergenceReturn new
-							 returnGood: returnGood;
-							 returnBad: returnBad;
-							 yourself) ]
-				ifFalse: [ 
-					1halt.
-					
-					 ]
-				
-				
-				 ] ]
+			 self
+				 returnGood: returnGood state returnValue
+				 equivalentBad: returnBad state returnValue ])
+			ifTrue: [
+				goodReturn remove: returnGood ifAbsent: [  ].
+				badReturn remove: returnBad ifAbsent: [  ] ]
+			ifFalse: [
+				(returnGood node isEquivalentTo: returnBad node)
+					ifTrue: [
+						result add: (EchoDivergenceReturn new
+								 returnGood: returnGood;
+								 returnBad: returnBad;
+								 yourself).
+						goodReturn remove: returnGood ifAbsent: [  ].
+						badReturn remove: returnBad ifAbsent: [  ] ]
+					ifFalse: [
+						1 halt.
+						checkReturnGood := badReturn select: [ :b |
+							                   b node isEquivalentTo: returnGood node ].
+						checkReturnBad := goodReturn select: [ :b |
+							                  b node isEquivalentTo: returnBad node ].
+						checkReturnGood ifEmpty: [
+							result add: (EchoDivergenceReturn new
+									 returnGood: returnGood;
+									 yourself).
+							goodReturn remove: returnGood ifAbsent: [  ] ].
+						checkReturnBad ifEmpty: [
+							result add: (EchoDivergenceReturn new
+									 returnBad: returnBad;
+									 yourself).
+							badReturn remove: returnBad ifAbsent: [  ] ] ] ] ].
+			
+		^ result 
+]
+
+{ #category : 'as yet unclassified' }
+Echo >> returnGood: aGoodValue  equivalentBad: aBadValue [
+
+
+	aGoodValue = aBadValue ifFalse: [ 
+		^  (aGoodValue class name , '_echo') = (aBadValue class name ) ].
+	^ true.
+		
+		 
+
 ]
 
 { #category : 'executing' }
 Echo >> step [
+1haltIf:[interpreterGood programCounter = 1040].
 
 	interpreterGood isTerminated ifFalse: [
 		((self packages includes: interpreterGood receiver package) or: [
