@@ -41,7 +41,7 @@ EchoDebuggerPresenter >> defaultLayout [
 
 	| newLayout |
 	newLayout := SpBoxLayout newTopToBottom.
-	newLayout add: self buttonBar expand: false.
+	newLayout add: self echoLegend expand: false fill: false.
 	newLayout add: (SpPanedLayout newTopToBottom
 			 positionOfSlider: 30 percent;
 			 add: self divergencesList;
@@ -56,6 +56,31 @@ EchoDebuggerPresenter >> defaultLayout [
 EchoDebuggerPresenter >> divergencesList [
 
 	^ divergencesList
+]
+
+{ #category : 'layout' }
+EchoDebuggerPresenter >> echoLegend [
+
+	^ SpBoxLayout newLeftToRight
+		  add: (self newButton
+				   label: 'Assignments';
+				   borderWidth: 0;
+				   icon: (Smalltalk ui iconNamed: #instVarsSelected);
+				   yourself)
+		  expand: false fill: false;
+		  add: (self newButton
+				   label: 'Control flow';
+				   borderWidth: 0;
+				   icon: (Smalltalk ui iconNamed: #publish);
+				   yourself)
+		  expand: false fill: false;
+		  add: (self newButton
+				   label: 'Return values';
+				   borderWidth: 0;
+				   icon: (Smalltalk ui iconNamed: #refresh);
+				   yourself)
+		  expand: false fill: false;
+		  yourself
 ]
 
 { #category : 'initialize' }
