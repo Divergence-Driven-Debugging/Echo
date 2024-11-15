@@ -39,7 +39,7 @@ EchoDivergenceMessage >> printOn: str [
 { #category : 'api - selection' }
 EchoDivergenceMessage >> selectItem: modifiedStack [
 
-	1 haltOnce.
+"	1 haltOnce."
 
 	^ (modifiedStack items select: [ :s |
 		   s programCounter = (self modified programCounter + self shift) ])
