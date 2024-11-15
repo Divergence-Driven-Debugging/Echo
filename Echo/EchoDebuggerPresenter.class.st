@@ -109,7 +109,8 @@ EchoDebuggerPresenter >> initializePresenters [
 { #category : 'layout' }
 EchoDebuggerPresenter >> modifiedExecutionLayout [
 
-	^ SpBoxLayout newTopToBottom
+	^ SpBoxLayout newTopToBottom	
+		  add: 'Modified execution' expand: false fill: false padding: 5;		 
 		  add: modifiedStack;
 		  add: modifiedCode;
 		  yourself
@@ -119,6 +120,7 @@ EchoDebuggerPresenter >> modifiedExecutionLayout [
 EchoDebuggerPresenter >> referenceExecutionLayout [
 
 	^ SpBoxLayout newTopToBottom
+		  add: 'Reference execution' expand: false fill: false padding: 5;	
 		  add: referenceStack;
 		  add: referenceCode;
 		  yourself
