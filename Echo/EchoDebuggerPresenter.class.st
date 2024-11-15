@@ -74,6 +74,7 @@ EchoDebuggerPresenter >> initializePresenters [
 	divergencesList := self newList.
 	divergencesList activateOnDoubleClick whenActivatedDo: [ :div |
 		div selectedItem inspect ].
+	divergencesList displayIcon: [ :elem | elem icon].
 	"divergencesList display:  [ :div | div printString ]."
 	
 

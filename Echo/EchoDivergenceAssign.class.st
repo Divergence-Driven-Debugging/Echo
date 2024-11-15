@@ -33,6 +33,11 @@ EchoDivergenceAssign >> flow: anObject [
 	flow := anObject
 ]
 
+{ #category : 'accessing' }
+EchoDivergenceAssign >> icon [
+	^Smalltalk ui iconNamed: #instVarsSelected
+]
+
 { #category : 'printing' }
 EchoDivergenceAssign >> printBadState: str [ 
 

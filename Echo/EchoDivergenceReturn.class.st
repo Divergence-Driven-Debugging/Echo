@@ -6,6 +6,11 @@ Class {
 	#tag : 'Core'
 }
 
+{ #category : 'accessing' }
+EchoDivergenceReturn >> icon [
+	^Smalltalk ui iconNamed: #refresh
+]
+
 { #category : 'printing' }
 EchoDivergenceReturn >> printBadReturn: str [
 

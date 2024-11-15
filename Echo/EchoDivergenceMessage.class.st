@@ -22,6 +22,11 @@ EchoDivergenceMessage >> collectGood: aCollection [
 	collectGood := aCollection .
 ]
 
+{ #category : 'accessing' }
+EchoDivergenceMessage >> icon [
+	^Smalltalk ui iconNamed: #publish
+]
+
 { #category : 'printing' }
 EchoDivergenceMessage >> printOn: str [
 
