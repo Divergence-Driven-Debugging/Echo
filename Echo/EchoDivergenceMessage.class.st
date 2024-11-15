@@ -12,13 +12,14 @@ Class {
 
 { #category : 'accessing' }
 EchoDivergenceMessage >> collectBad: aCollection [
-
+	" i'm the collection of the program states who go on convergence on the bad version to these original state"
 	collectBad:= aCollection .
 ]
 
 { #category : 'accessing' }
 EchoDivergenceMessage >> collectGood: aCollection [
-
+	" i'm the collection of the program states who go on convergence on the good version to these modified state"
+	
 	collectGood := aCollection .
 ]
 
