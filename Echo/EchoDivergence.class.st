@@ -29,6 +29,11 @@ EchoDivergence class >> reference: ref modified: mod shift: shift [
 		  yourself
 ]
 
+{ #category : 'accessing' }
+EchoDivergence >> icon [
+	^self subclassResponsibility 
+]
+
 { #category : 'initialization' }
 EchoDivergence >> initialize [ 
 

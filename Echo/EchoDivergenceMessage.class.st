@@ -23,6 +23,11 @@ EchoDivergenceMessage >> collectGood: aCollection [
 	collectGood := aCollection .
 ]
 
+{ #category : 'accessing' }
+EchoDivergenceMessage >> icon [
+	^Smalltalk ui iconNamed: #publish
+]
+
 { #category : 'printing' }
 EchoDivergenceMessage >> printOn: str [
 
@@ -40,7 +45,7 @@ EchoDivergenceMessage >> printOn: str [
 { #category : 'api - selection' }
 EchoDivergenceMessage >> selectItem: modifiedStack [
 
-	1 haltOnce.
+"	1 haltOnce."
 
 	^ (modifiedStack items select: [ :s |
 		   s programCounter = (self modified programCounter + self shift) ])

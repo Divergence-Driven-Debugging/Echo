@@ -41,7 +41,7 @@ EchoDebuggerPresenter >> defaultLayout [
 
 	| newLayout |
 	newLayout := SpBoxLayout newTopToBottom.
-	newLayout add: self buttonBar expand: false.
+	newLayout add: self echoLegend expand: false fill: false.
 	newLayout add: (SpPanedLayout newTopToBottom
 			 positionOfSlider: 30 percent;
 			 add: self divergencesList;
@@ -56,6 +56,31 @@ EchoDebuggerPresenter >> defaultLayout [
 EchoDebuggerPresenter >> divergencesList [
 
 	^ divergencesList
+]
+
+{ #category : 'layout' }
+EchoDebuggerPresenter >> echoLegend [
+
+	^ SpBoxLayout newLeftToRight
+		  add: (self newButton
+				   label: 'Assignments';
+				   borderWidth: 0;
+				   icon: (Smalltalk ui iconNamed: #instVarsSelected);
+				   yourself)
+		  expand: false fill: false;
+		  add: (self newButton
+				   label: 'Control flow';
+				   borderWidth: 0;
+				   icon: (Smalltalk ui iconNamed: #publish);
+				   yourself)
+		  expand: false fill: false;
+		  add: (self newButton
+				   label: 'Return values';
+				   borderWidth: 0;
+				   icon: (Smalltalk ui iconNamed: #refresh);
+				   yourself)
+		  expand: false fill: false;
+		  yourself
 ]
 
 { #category : 'initialize' }
@@ -74,6 +99,7 @@ EchoDebuggerPresenter >> initializePresenters [
 	divergencesList := self newList.
 	divergencesList activateOnDoubleClick whenActivatedDo: [ :div |
 		div selectedItem inspect ].
+	divergencesList displayIcon: [ :elem | elem icon].
 	"divergencesList display:  [ :div | div printString ]."
 	
 
@@ -107,9 +133,18 @@ EchoDebuggerPresenter >> initializePresenters [
 ]
 
 { #category : 'layout' }
+EchoDebuggerPresenter >> initializeWindow: aWindowPresenter [
+
+	aWindowPresenter
+		title: self title;
+		initialExtent: 700 @ 600
+]
+
+{ #category : 'layout' }
 EchoDebuggerPresenter >> modifiedExecutionLayout [
 
-	^ SpBoxLayout newTopToBottom
+	^ SpBoxLayout newTopToBottom	
+		  add: 'Modified execution' expand: false fill: false padding: 5;		 
 		  add: modifiedStack;
 		  add: modifiedCode;
 		  yourself
@@ -119,6 +154,7 @@ EchoDebuggerPresenter >> modifiedExecutionLayout [
 EchoDebuggerPresenter >> referenceExecutionLayout [
 
 	^ SpBoxLayout newTopToBottom
+		  add: 'Reference execution' expand: false fill: false padding: 5;	
 		  add: referenceStack;
 		  add: referenceCode;
 		  yourself
@@ -127,6 +163,15 @@ EchoDebuggerPresenter >> referenceExecutionLayout [
 { #category : 'initialize' }
 EchoDebuggerPresenter >> setModelBeforeInitialization: anEchoDebuggingResult [
 	echo := anEchoDebuggingResult
+]
+
+{ #category : 'layout' }
+EchoDebuggerPresenter >> title [
+
+	^ String streamContents: [ :str |
+		  str << echo last size printString.
+		  str space.
+		  str << 'divergences detected' ]
 ]
 
 { #category : 'initialize' }
