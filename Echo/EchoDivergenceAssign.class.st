@@ -1,3 +1,7 @@
+"
+""flow correspond a si la divergence est lie au flow ou non, si oui la variable est a true
+state correspond a si la divergence est lie au state ou non, si oui la variable est a true""
+"
 Class {
 	#name : 'EchoDivergenceAssign',
 	#superclass : 'EchoDivergence',

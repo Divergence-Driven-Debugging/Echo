@@ -390,14 +390,16 @@ Echo >> packages: anObject [
 { #category : 'removing' }
 Echo >> removeReturn: return divergence: diverge [
 
-	|result|
-"	1halt.
-	
-	result :=OrderedCollection new.
-	diverge  do: [ :d | return  select: [:r |  (r state currentContext messageNode ifNil: [DASTNilNode new]) isEquivalentTo:(d node) ] thenDo: [ :r | result add: r ] ].
-	result removeDuplicates .
-	result do: [ :r | return remove: r ].
-	1halt."
+	| result |
+	result := OrderedCollection new.
+	diverge do: [ :d |
+		return
+			select: [ :r |
+				(r state currentContext messageNode ifNil: [ DASTNilNode new ])
+					isEquivalentTo: d node ]
+			thenDo: [ :r | result add: r ] ].
+	result removeDuplicates.
+	result do: [ :r | return remove: r ]
 ]
 
 { #category : 'as yet unclassified' }
@@ -459,7 +461,6 @@ Echo >> returnGood: aGoodValue  equivalentBad: aBadValue [
 
 { #category : 'executing' }
 Echo >> step [
-1haltIf:[interpreterGood programCounter = 1040].
 
 	interpreterGood isTerminated ifFalse: [
 		((self packages includes: interpreterGood receiver package) or: [
@@ -472,4 +473,27 @@ Echo >> step [
 			 interpreterBad receiver = nil ])
 			ifTrue: [ interpreterBad stepInto ]
 			ifFalse: [ interpreterBad stepOver ] ]
+]
+
+{ #category : 'executing' }
+Echo >> stepTo: aGoodProgramCounter bad: aBadProgramCounter [
+
+	[interpreterGood programCounter < aGoodProgramCounter] whileTrue: [ 
+		interpreterGood stepInto ].
+	[interpreterBad programCounter < aBadProgramCounter] whileTrue: [ 
+		interpreterBad stepInto ].
+^ OrderedCollection new add: interpreterGood ; add: interpreterBad ; yourself
+
+]
+
+{ #category : 'executing' }
+Echo >> timeTravelGood: aGoodProgramCounter bad: aBadProgramCounter [
+
+	interpreterGood := DASTInterpreter new.
+	interpreterGood initializeWithProgram: ((RBParser parseExpression: good)).
+	interpreterBad := DASTInterpreter new.
+	interpreterBad initializeWithProgram: ((RBParser parseExpression: bad)). 
+   ^ self stepTo: aGoodProgramCounter bad:aBadProgramCounter
+
+
 ]

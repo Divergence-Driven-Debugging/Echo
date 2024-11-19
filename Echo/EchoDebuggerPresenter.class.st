@@ -8,12 +8,22 @@ Class {
 		'modifiedStack',
 		'modifiedCode',
 		'divergencesList',
-		'echo'
+		'echo',
+		'menuTimeTravel',
+		'echoResult'
 	],
 	#category : 'Echo-Presenters',
 	#package : 'Echo',
 	#tag : 'Presenters'
 }
+
+{ #category : 'instance creation' }
+EchoDebuggerPresenter class >> on: aDomainObject echo: echo [
+1halt.
+	^ (self 
+		newApplication: self currentApplication
+		model: aDomainObject) echo: echo ; yourself .
+]
 
 { #category : 'layout' }
 EchoDebuggerPresenter >> buttonBar [
@@ -58,6 +68,12 @@ EchoDebuggerPresenter >> divergencesList [
 	^ divergencesList
 ]
 
+{ #category : 'accessing' }
+EchoDebuggerPresenter >> echo: aEcho [
+
+	echo := aEcho 
+]
+
 { #category : 'layout' }
 EchoDebuggerPresenter >> echoLegend [
 
@@ -94,6 +110,23 @@ EchoDebuggerPresenter >> initializeEventsBetweenStack: stack andCode: code [
 ]
 
 { #category : 'initialize' }
+EchoDebuggerPresenter >> initializeEventsBetweenStackOnTimeTravel: stack andCode: code [
+
+	stack transmitDo: [ :programState |
+		programState ifNotNil: [ self updateCodeTDD: code with: programState ] ].
+	stack display: [ :programState |
+		String streamContents: [ :str |
+			programState currentContext printOn: str ] ]
+]
+
+{ #category : 'initialization' }
+EchoDebuggerPresenter >> initializeMenu [
+
+	menuTimeTravel := self newMenu.
+	menuTimeTravel addItem: [ :item | item name: 'Time Travel Debugger at This Point'; "icon" action: [ self openTimeTravelDebuggerOn: divergencesList selectedItem  ]  ]
+]
+
+{ #category : 'initialize' }
 EchoDebuggerPresenter >> initializePresenters [
 
 	divergencesList := self newList.
@@ -117,19 +150,25 @@ EchoDebuggerPresenter >> initializePresenters [
 		initializeEventsBetweenStack: referenceStack
 		andCode: referenceCode.
 
-	referenceStack items: echo first.
+	referenceStack items: echoResult first.
 	referenceStack selectFirst.
-	modifiedStack items: echo second.
+	
+	modifiedStack items: echoResult second.
 	modifiedStack selectFirst.
-	divergencesList items: echo last.
+	
+	
+	divergencesList items: echoResult last.
 	divergencesList transmitDo: [ :div |
-		div ifNotNil: [1haltOnce. 
+		div ifNotNil: [
 			referenceStack
 				selectItem: (div reference state ifNil: [0]) 
 				scrollToSelection: true.
 			modifiedStack
 				selectItem: (div modified state ifNil: [0]  )
 				scrollToSelection: true ] ].
+		
+	self initializeMenu .
+	divergencesList contextMenu: menuTimeTravel 
 ]
 
 { #category : 'layout' }
@@ -150,6 +189,20 @@ EchoDebuggerPresenter >> modifiedExecutionLayout [
 		  yourself
 ]
 
+{ #category : 'initialization' }
+EchoDebuggerPresenter >> openTimeTravelDebuggerOn: aEchoDivergence [
+
+	| result |
+	result := echo timeTravelGood: aEchoDivergence reference programCounter bad: aEchoDivergence modified programCounter.
+	self flag: 'todo: il faut mettre a jour la stack et le code, il faut utiliser le initializeEventsBetweenStackOnTimeTravel. Pour les items il faut :
+	referenceStack items: result first contextsStack.
+	referenceStack selectFirst.
+	
+	modifiedStack items: result second contextsStack.
+	modifiedStack selectFirst.
+	 '
+]
+
 { #category : 'layout' }
 EchoDebuggerPresenter >> referenceExecutionLayout [
 
@@ -162,14 +215,14 @@ EchoDebuggerPresenter >> referenceExecutionLayout [
 
 { #category : 'initialize' }
 EchoDebuggerPresenter >> setModelBeforeInitialization: anEchoDebuggingResult [
-	echo := anEchoDebuggingResult
+	echoResult := anEchoDebuggingResult
 ]
 
 { #category : 'layout' }
 EchoDebuggerPresenter >> title [
 
 	^ String streamContents: [ :str |
-		  str << echo last size printString.
+		  str << echoResult last size printString.
 		  str space.
 		  str << 'divergences detected' ]
 ]
@@ -187,5 +240,20 @@ EchoDebuggerPresenter >> updateCode: code with: programState [
 		(SpTextPresenterDecorator forHighlight
 			 interval:
 				 (programState node start to: programState node stop + 1);
+			 yourself)
+]
+
+{ #category : 'as yet unclassified' }
+EchoDebuggerPresenter >> updateCodeTDD: code with: context [
+
+
+	code text: context sourceCode.
+	code beForContext: context.
+	code removeAllTextSegmentDecorations.
+
+	code addTextSegmentDecoration:
+		(SpTextPresenterDecorator forHighlight
+			 interval:
+				 (context currentNode start to: context currentNode stop + 1);
 			 yourself)
 ]

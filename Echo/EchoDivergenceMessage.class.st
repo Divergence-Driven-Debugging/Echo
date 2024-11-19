@@ -1,3 +1,7 @@
+"
+collectBad is the collection of bad program state to reconverge at node reference
+collectGood is the collection of bad program state to reconverge at node modified
+"
 Class {
 	#name : 'EchoDivergenceMessage',
 	#superclass : 'EchoDivergence',

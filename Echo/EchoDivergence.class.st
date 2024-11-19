@@ -1,5 +1,9 @@
 "
 Basic divergence model
+
+modified is the program state in the bad version
+reference is the state in the original version
+
 "
 Class {
 	#name : 'EchoDivergence',
