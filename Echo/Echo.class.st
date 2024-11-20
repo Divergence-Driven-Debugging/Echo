@@ -464,17 +464,9 @@ Echo >> returnGood: aGoodValue  equivalentBad: aBadValue [
 { #category : 'executing' }
 Echo >> step [
 
-	interpreterGood isTerminated ifFalse: [
-		((self packages includes: interpreterGood receiver package) or: [
-			 interpreterGood receiver = nil ])
-			ifTrue: [ interpreterGood stepInto ]
-			ifFalse: [ interpreterGood stepOver ] ].
+	interpreterGood isTerminated ifFalse: [ interpreterGood stepInto ].
 
-	interpreterBad isTerminated ifFalse: [
-		((self packages includes: interpreterBad receiver package) or: [
-			 interpreterBad receiver = nil ])
-			ifTrue: [ interpreterBad stepInto ]
-			ifFalse: [ interpreterBad stepOver ] ]
+	interpreterBad isTerminated ifFalse: [ interpreterBad stepInto ]
 ]
 
 { #category : 'executing' }
