@@ -109,7 +109,7 @@ EchoDebuggerPresenter >> initializeEventsBetweenStack: stack andCode: code [
 			programState currentContext printOn: str ] ]
 ]
 
-{ #category : 'initialize' }
+{ #category : 'initialization' }
 EchoDebuggerPresenter >> initializeEventsBetweenStackOnTimeTravel: stack andCode: code [
 
 	stack transmitDo: [ :programState |
@@ -171,7 +171,7 @@ EchoDebuggerPresenter >> initializePresenters [
 	divergencesList contextMenu: menuTimeTravel 
 ]
 
-{ #category : 'layout' }
+{ #category : 'initialization' }
 EchoDebuggerPresenter >> initializeWindow: aWindowPresenter [
 
 	aWindowPresenter
@@ -213,7 +213,7 @@ EchoDebuggerPresenter >> referenceExecutionLayout [
 		  yourself
 ]
 
-{ #category : 'initialize' }
+{ #category : 'initialization' }
 EchoDebuggerPresenter >> setModelBeforeInitialization: anEchoDebuggingResult [
 	echoResult := anEchoDebuggingResult
 ]
@@ -243,7 +243,7 @@ EchoDebuggerPresenter >> updateCode: code with: programState [
 			 yourself)
 ]
 
-{ #category : 'as yet unclassified' }
+{ #category : 'updating' }
 EchoDebuggerPresenter >> updateCodeTDD: code with: context [
 
 
