@@ -106,7 +106,7 @@ Echo >> creationInstanceDiv: programmState [
 Echo >> divergenceAssignementGood: solveGood bad: solveBad result: result shift: baseShift [
 
 	| assGood assBad reconvGood reconvBad shift |
-	1halt.
+
 	shift := 0.
 	[ solveGood isNotEmpty or: [ solveBad isNotEmpty ] ] whileTrue: [
 		assGood := solveGood at: 1 ifAbsent: [ DASTGoodMissing new ].
@@ -231,7 +231,7 @@ Echo >> divergenceConvergenceGood: solveGood bad: solveBad result: result shift:
 
 	| size assGood assBad r1 reconvGood reconvBad collectGood collectBad shift |
 	size := solveGood size max: solveBad size.
-	1 halt.
+
 	[ solveGood isNotEmpty and: [ solveBad isNotEmpty ] ] whileTrue: [
 		assGood := solveGood at: 1 ifAbsent: [ DASTGoodMissing new ].
 		assBad := solveBad at: 1 ifAbsent: [ DASTBadMissing new ].
@@ -406,7 +406,7 @@ Echo >> removeReturn: return divergence: diverge [
 Echo >> returnDivGood: goodReturn bad: badReturn [
 
 	| returnGood returnBad result checkReturnGood checkReturnBad |
-	1 halt.
+
 	result := OrderedCollection new.
 	[ goodReturn isNotEmpty or: [ goodReturn isNotEmpty ] ] whileTrue: [
 		returnGood := goodReturn at: 1 ifAbsent: [ DASTGoodMissing new ].
@@ -428,7 +428,7 @@ Echo >> returnDivGood: goodReturn bad: badReturn [
 						goodReturn remove: returnGood ifAbsent: [  ].
 						badReturn remove: returnBad ifAbsent: [  ] ]
 					ifFalse: [
-						1 halt.
+			
 						checkReturnGood := badReturn select: [ :b |
 							                   b node isEquivalentTo: returnGood node ].
 						checkReturnBad := goodReturn select: [ :b |
