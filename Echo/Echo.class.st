@@ -81,7 +81,7 @@ Echo >> creationInstanceDiv: programmState [
 	goodState := programmState goodProgState.
 	badState := programmState badProgState.
 
-	1halt.
+	
 	ttqGood := TTQAllInstanceCreations queryFrom: goodState.
 	solveGood := QSCollection solve: ttqGood.
 
@@ -106,7 +106,7 @@ Echo >> creationInstanceDiv: programmState [
 Echo >> divergenceAssignementGood: solveGood bad: solveBad result: result shift: baseShift [
 
 	| assGood assBad reconvGood reconvBad shift |
-	1halt.
+	
 	shift := 0.
 	[ solveGood isNotEmpty or: [ solveBad isNotEmpty ] ] whileTrue: [
 		assGood := solveGood at: 1 ifAbsent: [ DASTGoodMissing new ].
@@ -231,7 +231,7 @@ Echo >> divergenceConvergenceGood: solveGood bad: solveBad result: result shift:
 
 	| size assGood assBad r1 reconvGood reconvBad collectGood collectBad shift |
 	size := solveGood size max: solveBad size.
-	1 halt.
+	
 	[ solveGood isNotEmpty and: [ solveBad isNotEmpty ] ] whileTrue: [
 		assGood := solveGood at: 1 ifAbsent: [ DASTGoodMissing new ].
 		assBad := solveBad at: 1 ifAbsent: [ DASTBadMissing new ].
@@ -301,6 +301,8 @@ Echo >> execute [
 "	1halt ."
 	[ interpreterGood isTerminated not or: [interpreterBad  isTerminated not ]] whileTrue: [ 
 	"algo algoDiff."
+	('je suis au pc ' ,  interpreterGood programCounter asString ) traceCr.
+	1 haltIf: [ interpreterGood programCounter = 600000 ].
 	self step.
 	programmState collect].
 	result add: programmState goodProgState .
@@ -406,7 +408,7 @@ Echo >> removeReturn: return divergence: diverge [
 Echo >> returnDivGood: goodReturn bad: badReturn [
 
 	| returnGood returnBad result checkReturnGood checkReturnBad |
-	1 halt.
+	
 	result := OrderedCollection new.
 	[ goodReturn isNotEmpty or: [ goodReturn isNotEmpty ] ] whileTrue: [
 		returnGood := goodReturn at: 1 ifAbsent: [ DASTGoodMissing new ].

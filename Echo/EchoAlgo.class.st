@@ -28,7 +28,7 @@ EchoAlgo >> checkSlotValue: goodSlot bad: badSlot [
 	| diff result|
 	result := OrderedCollection new.
 	diff := goodSlot keys select: [ :s | ((goodSlot at: s ) = (badSlot at: s )) not].
-	diff ifNotEmpty: [ result := diff select: [ :s | 1halt. (self checkSlotValue: ((goodSlot at: s) slotsValue)  bad: ((badSlot at: s) slotsValue) )not] ].
+	diff ifNotEmpty: [ result := diff select: [ :s | (self checkSlotValue: ((goodSlot at: s) slotsValue)  bad: ((badSlot at: s) slotsValue) )not] ].
 	^ result isEmpty 
 ]
 

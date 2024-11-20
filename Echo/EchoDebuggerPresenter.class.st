@@ -19,7 +19,7 @@ Class {
 
 { #category : 'instance creation' }
 EchoDebuggerPresenter class >> on: aDomainObject echo: echo [
-1halt.
+
 	^ (self 
 		newApplication: self currentApplication
 		model: aDomainObject) echo: echo ; yourself .
