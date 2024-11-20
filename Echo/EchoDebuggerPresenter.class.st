@@ -54,7 +54,13 @@ EchoDebuggerPresenter >> defaultLayout [
 	newLayout add: self echoLegend expand: false fill: false.
 	newLayout add: (SpPanedLayout newTopToBottom
 			 positionOfSlider: 30 percent;
-			 add: divergencesTable ;
+			 add: (SpBoxLayout newTopToBottom
+					  add: 'Detected divergences'
+					  expand: false
+					  fill: false
+					  padding: 5;
+					  add: divergencesTable;
+					  yourself);
 			 add: (SpBoxLayout newLeftToRight
 					  add: self referenceExecutionLayout;
 					  add: self modifiedExecutionLayout;
