@@ -7,7 +7,6 @@ Class {
 		'referenceCode',
 		'modifiedStack',
 		'modifiedCode',
-		'divergencesList',
 		'echo',
 		'menuTimeTravel',
 		'echoResult',
@@ -61,12 +60,6 @@ EchoDebuggerPresenter >> defaultLayout [
 					  add: self modifiedExecutionLayout;
 					  yourself)).
 	^ newLayout
-]
-
-{ #category : 'layout' }
-EchoDebuggerPresenter >> divergencesList [
-
-	^ divergencesList
 ]
 
 { #category : 'accessing' }
@@ -152,7 +145,11 @@ EchoDebuggerPresenter >> initializeEventsBetweenStackOnTimeTravel: stack andCode
 EchoDebuggerPresenter >> initializeMenu [
 
 	menuTimeTravel := self newMenu.
-	menuTimeTravel addItem: [ :item | item name: 'Time Travel Debugger at This Point'; "icon" action: [ self openTimeTravelDebuggerOn: divergencesList selectedItem  ]  ]
+	menuTimeTravel addItem: [ :item |
+		item
+			name: 'Time Travel Debugger at This Point';
+			"icon"action: [
+				self openTimeTravelDebuggerOn: divergencesTable selectedItem ] ]
 ]
 
 { #category : 'initialization' }
