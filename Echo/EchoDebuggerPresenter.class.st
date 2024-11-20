@@ -264,16 +264,28 @@ EchoDebuggerPresenter >> title [
 { #category : 'initialization' }
 EchoDebuggerPresenter >> updateCode: code with: programState [
 
-	| context |
+	| context nodeSource sourceDelta start stop |
 	context := programState currentContext.
 	code text: (self printStringWithoutEcho: context sourceCode).
 	code beForContext: context.
 	code removeAllTextSegmentDecorations.
 
+
+	nodeSource := programState node sourceCode.
+	sourceDelta := programState node methodNode sourceCode size - code text size.
+	start := programState node start - sourceDelta.
+	stop := programState node stop - sourceDelta + 1.
+
+	(nodeSource includesSubstring: '_echo') ifTrue: [
+		| interval |
+		interval := (code text allRangesOfSubstring:
+			             (self printStringWithoutEcho: nodeSource)) last.
+		start := interval first.
+		stop := interval last + 1 ].
+
 	code addTextSegmentDecoration:
 		(SpTextPresenterDecorator forHighlight
-			 interval:
-				 (programState node start to: programState node stop + 1);
+			 interval: (start to: stop);
 			 yourself)
 ]
 
