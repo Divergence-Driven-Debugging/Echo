@@ -272,7 +272,7 @@ EchoDebuggerPresenter >> updateCode: code with: programState [
 
 
 	nodeSource := programState node sourceCode.
-	sourceDelta := programState node methodNode sourceCode size - code text size.
+	sourceDelta := ((context sourceCode copyFrom: 1 to: programState node stop) allRangesOfSubstring: '_echo') size * 5.	
 	start := programState node start - sourceDelta.
 	stop := programState node stop - sourceDelta + 1.
 
