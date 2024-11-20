@@ -7,10 +7,10 @@ Class {
 		'referenceCode',
 		'modifiedStack',
 		'modifiedCode',
-		'divergencesList',
 		'echo',
 		'menuTimeTravel',
-		'echoResult'
+		'echoResult',
+		'divergencesTable'
 	],
 	#category : 'Echo-Presenters',
 	#package : 'Echo',
@@ -54,18 +54,18 @@ EchoDebuggerPresenter >> defaultLayout [
 	newLayout add: self echoLegend expand: false fill: false.
 	newLayout add: (SpPanedLayout newTopToBottom
 			 positionOfSlider: 30 percent;
-			 add: self divergencesList;
+			 add: (SpBoxLayout newTopToBottom
+					  add: 'Detected divergences'
+					  expand: false
+					  fill: false
+					  padding: 5;
+					  add: divergencesTable;
+					  yourself);
 			 add: (SpBoxLayout newLeftToRight
 					  add: self referenceExecutionLayout;
 					  add: self modifiedExecutionLayout;
 					  yourself)).
 	^ newLayout
-]
-
-{ #category : 'layout' }
-EchoDebuggerPresenter >> divergencesList [
-
-	^ divergencesList
 ]
 
 { #category : 'accessing' }
@@ -99,17 +99,42 @@ EchoDebuggerPresenter >> echoLegend [
 		  yourself
 ]
 
-{ #category : 'initialize' }
+{ #category : 'initialization' }
+EchoDebuggerPresenter >> initializeDivergenceTable [
+
+	divergencesTable := self newTable.
+	divergencesTable activateOnDoubleClick whenActivatedDo: [ :div |
+		div selectedItem inspect ].
+	divergencesTable addColumn: (SpIndexTableColumn new width: 20; yourself).
+	divergencesTable addColumn: (SpImageTableColumn new width: 25; evaluated: [ :elem | elem icon ]; yourself).
+	divergencesTable addColumn: ((SpStringTableColumn title: 'Reference' evaluated: [ :elem | self printAutoTypeEcho: elem reference]) width: 200; yourself).
+	divergencesTable addColumn: ((SpStringTableColumn title: 'Modified' evaluated: [ :elem | self printAutoTypeEcho: elem modified]) width: 200; yourself).
+	divergencesTable addColumn: (SpLinkTableColumn new width: 50; evaluated: [ :elem | 'jump' ]; action:[:row| row inspect]; yourself).
+	"divergencesTable displayIcon: [ :elem | elem icon]."
+	
+
+	divergencesTable items: echoResult last.
+	divergencesTable transmitDo: [ :div |
+		div ifNotNil: [
+			referenceStack
+				selectItem: (div reference state ifNil: [0]) 
+				scrollToSelection: true.
+			modifiedStack
+				selectItem: (div modified state ifNil: [0]  )
+				scrollToSelection: true ] ].
+		
+	self initializeMenu.
+	divergencesTable contextMenu: menuTimeTravel 
+]
+
+{ #category : 'initialization' }
 EchoDebuggerPresenter >> initializeEventsBetweenStack: stack andCode: code [
 
 	stack transmitDo: [ :programState |
 		programState ifNotNil: [ self updateCode: code with: programState ] ].
-	stack display: [ :programState |
-		String streamContents: [ :str |
-			programState currentContext printOn: str ] ]
 ]
 
-{ #category : 'initialize' }
+{ #category : 'initialization' }
 EchoDebuggerPresenter >> initializeEventsBetweenStackOnTimeTravel: stack andCode: code [
 
 	stack transmitDo: [ :programState |
@@ -123,27 +148,24 @@ EchoDebuggerPresenter >> initializeEventsBetweenStackOnTimeTravel: stack andCode
 EchoDebuggerPresenter >> initializeMenu [
 
 	menuTimeTravel := self newMenu.
-	menuTimeTravel addItem: [ :item | item name: 'Time Travel Debugger at This Point'; "icon" action: [ self openTimeTravelDebuggerOn: divergencesList selectedItem  ]  ]
+	menuTimeTravel addItem: [ :item |
+		item
+			name: 'Time Travel Debugger at This Point';
+			"icon"action: [
+				self openTimeTravelDebuggerOn: divergencesTable selectedItem ] ]
 ]
 
-{ #category : 'initialize' }
+{ #category : 'initialization' }
 EchoDebuggerPresenter >> initializePresenters [
 
-	divergencesList := self newList.
-	divergencesList activateOnDoubleClick whenActivatedDo: [ :div |
-		div selectedItem inspect ].
-	divergencesList displayIcon: [ :elem | elem icon].
-	"divergencesList display:  [ :div | div printString ]."
-	
-
-	modifiedStack := self newList.
+	modifiedStack := self newTable.
 	modifiedCode := self newCode.
 	modifiedCode beNotEditable.
 	self
 		initializeEventsBetweenStack: modifiedStack
 		andCode: modifiedCode.
 
-	referenceStack := self newList.
+	referenceStack := self newTable.
 	referenceCode := self newCode.
 	referenceCode beNotEditable.
 	self
@@ -151,27 +173,38 @@ EchoDebuggerPresenter >> initializePresenters [
 		andCode: referenceCode.
 
 	referenceStack items: echoResult first.
+	referenceStack activateOnDoubleClick whenActivatedDo: [ :div |
+		div selectedItem inspect ].
 	referenceStack selectFirst.
-	
+	referenceStack addColumn: ((SpStringTableColumn
+			  title: 'PC'
+			  evaluated: [ :elem | elem programCounter ])
+			 width: 30;
+			 yourself).
+	referenceStack addColumn:
+		(SpStringTableColumn title: 'Context' evaluated: [ :programState |
+			 self printStringWithoutEcho: (String streamContents: [ :str |
+					  programState currentContext printOn: str ]) ]).
+
+
 	modifiedStack items: echoResult second.
+	modifiedStack activateOnDoubleClick whenActivatedDo: [ :div |
+		div selectedItem inspect ].
 	modifiedStack selectFirst.
-	
-	
-	divergencesList items: echoResult last.
-	divergencesList transmitDo: [ :div |
-		div ifNotNil: [
-			referenceStack
-				selectItem: (div reference state ifNil: [0]) 
-				scrollToSelection: true.
-			modifiedStack
-				selectItem: (div modified state ifNil: [0]  )
-				scrollToSelection: true ] ].
-		
-	self initializeMenu .
-	divergencesList contextMenu: menuTimeTravel 
+	modifiedStack addColumn: ((SpStringTableColumn
+			  title: 'PC'
+			  evaluated: [ :elem | elem programCounter ])
+			 width: 30;
+			 yourself).
+	modifiedStack addColumn:
+		(SpStringTableColumn title: 'Context' evaluated: [ :programState |
+			 self printStringWithoutEcho: (String streamContents: [ :str |
+					  programState currentContext printOn: str ]) ]).
+
+	self initializeDivergenceTable
 ]
 
-{ #category : 'layout' }
+{ #category : 'initialization' }
 EchoDebuggerPresenter >> initializeWindow: aWindowPresenter [
 
 	aWindowPresenter
@@ -203,6 +236,24 @@ EchoDebuggerPresenter >> openTimeTravelDebuggerOn: aEchoDivergence [
 	 '
 ]
 
+{ #category : 'printing' }
+EchoDebuggerPresenter >> printAutoTypeEcho: anAutoTypeEcho [
+
+	^ String streamContents: [ :stream |
+		  stream << '[pc: '.
+		  anAutoTypeEcho programCounter printOn: stream.
+		  stream << ']'.
+		  stream space.
+		  stream
+		  << (self printStringWithoutEcho: anAutoTypeEcho node sourceCode) ]
+]
+
+{ #category : 'printing' }
+EchoDebuggerPresenter >> printStringWithoutEcho: aString [
+
+	^ aString copyReplaceAll: '_echo' with: ''
+]
+
 { #category : 'layout' }
 EchoDebuggerPresenter >> referenceExecutionLayout [
 
@@ -213,7 +264,7 @@ EchoDebuggerPresenter >> referenceExecutionLayout [
 		  yourself
 ]
 
-{ #category : 'initialize' }
+{ #category : 'initialization' }
 EchoDebuggerPresenter >> setModelBeforeInitialization: anEchoDebuggingResult [
 	echoResult := anEchoDebuggingResult
 ]
@@ -227,23 +278,35 @@ EchoDebuggerPresenter >> title [
 		  str << 'divergences detected' ]
 ]
 
-{ #category : 'initialize' }
+{ #category : 'initialization' }
 EchoDebuggerPresenter >> updateCode: code with: programState [
 
-	| context |
+	| context nodeSource sourceDelta start stop |
 	context := programState currentContext.
-	code text: context sourceCode.
+	code text: (self printStringWithoutEcho: context sourceCode).
 	code beForContext: context.
 	code removeAllTextSegmentDecorations.
 
+
+	nodeSource := programState node sourceCode.
+	sourceDelta := ((context sourceCode copyFrom: 1 to: programState node stop) allRangesOfSubstring: '_echo') size * 5.	
+	start := programState node start - sourceDelta.
+	stop := programState node stop - sourceDelta + 1.
+
+	(nodeSource includesSubstring: '_echo') ifTrue: [
+		| interval |
+		interval := (code text allRangesOfSubstring:
+			             (self printStringWithoutEcho: nodeSource)) last.
+		start := interval first.
+		stop := interval last + 1 ].
+
 	code addTextSegmentDecoration:
 		(SpTextPresenterDecorator forHighlight
-			 interval:
-				 (programState node start to: programState node stop + 1);
+			 interval: (start to: stop);
 			 yourself)
 ]
 
-{ #category : 'as yet unclassified' }
+{ #category : 'updating' }
 EchoDebuggerPresenter >> updateCodeTDD: code with: context [
 
 

@@ -9,18 +9,3 @@ Class {
 	#package : 'Echo-Tests',
 	#tag : 'Core'
 }
-
-{ #category : 'testing' }
-Candy >> candy [
-
-	sugar := 10 .
-	chocolate := self chocolat .
-	sugar > 5 ifTrue: [^ 'caramel' ].
-	^ 'chocolate'
-]
-
-{ #category : 'reflective operations' }
-Candy >> doesNotUnderstand: aMessage [
-
-	^ 5 
-]
