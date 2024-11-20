@@ -22,16 +22,15 @@ EchoLoader >> loadBad [
 	metacello := Metacello new
 		             baseline: baseline;
 		             repository: repository;
+		             onConflictUseIncoming;
 		             load.
 
 	packages := (IceRepository repositoryNamed:
-		             metacello projectSpec name) workingCopy packageNames .
+		             'Pharo-Pillar-Bug') workingCopy packageNames.
 
 	packages := packages collect: [ :p | p asPackage ].
 
-	packages do: [ :p |
-		p classes do: [ :c | (ReRenameClassRefactoring rename: c name to: (c name , '_echo'))  execute ].
-		p renameTo: p name , '_echo' ]
+	self renameEcho: packages 
 ]
 
 { #category : 'as yet unclassified' }
@@ -40,7 +39,17 @@ EchoLoader >> loadGood [
 	Metacello new
     baseline:  baseline;
     repository: repository ;
+	onConflictUseIncoming ;
     load.
+]
+
+{ #category : 'as yet unclassified' }
+EchoLoader >> renameEcho: packages [
+
+1halt.
+packages do: [ :p |
+		p classes do: [ :c | (ReRenameClassRefactoring rename: c name to: (c name , '_echo'))  execute ].
+		p renameTo: p name , '_echo' ]
 ]
 
 { #category : 'accessing' }
