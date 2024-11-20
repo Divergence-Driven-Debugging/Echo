@@ -99,14 +99,14 @@ EchoDebuggerPresenter >> echoLegend [
 		  yourself
 ]
 
-{ #category : 'initialize' }
+{ #category : 'initialization' }
 EchoDebuggerPresenter >> initializeEventsBetweenStack: stack andCode: code [
 
 	stack transmitDo: [ :programState |
 		programState ifNotNil: [ self updateCode: code with: programState ] ].
 	stack display: [ :programState |
-		String streamContents: [ :str |
-			programState currentContext printOn: str ] ]
+	self printStringWithoutEcho: (String streamContents: [ :str |
+	programState currentContext printOn: str ]) ]
 ]
 
 { #category : 'initialization' }
@@ -126,7 +126,7 @@ EchoDebuggerPresenter >> initializeMenu [
 	menuTimeTravel addItem: [ :item | item name: 'Time Travel Debugger at This Point'; "icon" action: [ self openTimeTravelDebuggerOn: divergencesList selectedItem  ]  ]
 ]
 
-{ #category : 'initialize' }
+{ #category : 'initialization' }
 EchoDebuggerPresenter >> initializePresenters [
 
 	divergencesList := self newList.
@@ -151,12 +151,15 @@ EchoDebuggerPresenter >> initializePresenters [
 		andCode: referenceCode.
 
 	referenceStack items: echoResult first.
+	referenceStack activateOnDoubleClick whenActivatedDo: [ :div |
+		div selectedItem inspect ].
 	referenceStack selectFirst.
 	
 	modifiedStack items: echoResult second.
+	modifiedStack activateOnDoubleClick whenActivatedDo: [ :div |
+		div selectedItem inspect ].
 	modifiedStack selectFirst.
-	
-	
+		
 	divergencesList items: echoResult last.
 	divergencesList transmitDo: [ :div |
 		div ifNotNil: [
@@ -203,6 +206,12 @@ EchoDebuggerPresenter >> openTimeTravelDebuggerOn: aEchoDivergence [
 	 '
 ]
 
+{ #category : 'printing' }
+EchoDebuggerPresenter >> printStringWithoutEcho: aString [
+
+	^ aString copyReplaceAll: '_echo' with: ''
+]
+
 { #category : 'layout' }
 EchoDebuggerPresenter >> referenceExecutionLayout [
 
@@ -227,12 +236,12 @@ EchoDebuggerPresenter >> title [
 		  str << 'divergences detected' ]
 ]
 
-{ #category : 'initialize' }
+{ #category : 'initialization' }
 EchoDebuggerPresenter >> updateCode: code with: programState [
 
 	| context |
 	context := programState currentContext.
-	code text: context sourceCode.
+	code text: (self printStringWithoutEcho: context sourceCode).
 	code beForContext: context.
 	code removeAllTextSegmentDecorations.
 
