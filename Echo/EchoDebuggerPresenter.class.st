@@ -126,9 +126,6 @@ EchoDebuggerPresenter >> initializeEventsBetweenStack: stack andCode: code [
 
 	stack transmitDo: [ :programState |
 		programState ifNotNil: [ self updateCode: code with: programState ] ].
-	stack display: [ :programState |
-	self printStringWithoutEcho: (String streamContents: [ :str |
-	programState currentContext printOn: str ]) ]
 ]
 
 { #category : 'initialization' }
@@ -155,15 +152,14 @@ EchoDebuggerPresenter >> initializeMenu [
 { #category : 'initialization' }
 EchoDebuggerPresenter >> initializePresenters [
 
-
-	modifiedStack := self newList.
+	modifiedStack := self newTable.
 	modifiedCode := self newCode.
 	modifiedCode beNotEditable.
 	self
 		initializeEventsBetweenStack: modifiedStack
 		andCode: modifiedCode.
 
-	referenceStack := self newList.
+	referenceStack := self newTable.
 	referenceCode := self newCode.
 	referenceCode beNotEditable.
 	self
@@ -174,14 +170,32 @@ EchoDebuggerPresenter >> initializePresenters [
 	referenceStack activateOnDoubleClick whenActivatedDo: [ :div |
 		div selectedItem inspect ].
 	referenceStack selectFirst.
-	
+	referenceStack addColumn: ((SpStringTableColumn
+			  title: 'PC'
+			  evaluated: [ :elem | elem programCounter ])
+			 width: 30;
+			 yourself).
+	referenceStack addColumn:
+		(SpStringTableColumn title: 'Context' evaluated: [ :programState |
+			 self printStringWithoutEcho: (String streamContents: [ :str |
+					  programState currentContext printOn: str ]) ]).
+
+
 	modifiedStack items: echoResult second.
 	modifiedStack activateOnDoubleClick whenActivatedDo: [ :div |
 		div selectedItem inspect ].
 	modifiedStack selectFirst.
-		
-	self initializeDivergenceTable.
-	
+	modifiedStack addColumn: ((SpStringTableColumn
+			  title: 'PC'
+			  evaluated: [ :elem | elem programCounter ])
+			 width: 30;
+			 yourself).
+	modifiedStack addColumn:
+		(SpStringTableColumn title: 'Context' evaluated: [ :programState |
+			 self printStringWithoutEcho: (String streamContents: [ :str |
+					  programState currentContext printOn: str ]) ]).
+
+	self initializeDivergenceTable
 ]
 
 { #category : 'initialization' }
