@@ -10,7 +10,8 @@ Class {
 		'divergencesList',
 		'echo',
 		'menuTimeTravel',
-		'echoResult'
+		'echoResult',
+		'divergencesTable'
 	],
 	#category : 'Echo-Presenters',
 	#package : 'Echo',
@@ -54,7 +55,7 @@ EchoDebuggerPresenter >> defaultLayout [
 	newLayout add: self echoLegend expand: false fill: false.
 	newLayout add: (SpPanedLayout newTopToBottom
 			 positionOfSlider: 30 percent;
-			 add: self divergencesList;
+			 add: divergencesTable ;
 			 add: (SpBoxLayout newLeftToRight
 					  add: self referenceExecutionLayout;
 					  add: self modifiedExecutionLayout;
@@ -100,6 +101,34 @@ EchoDebuggerPresenter >> echoLegend [
 ]
 
 { #category : 'initialization' }
+EchoDebuggerPresenter >> initializeDivergenceTable [
+
+	divergencesTable := self newTable.
+	divergencesTable activateOnDoubleClick whenActivatedDo: [ :div |
+		div selectedItem inspect ].
+	divergencesTable addColumn: (SpIndexTableColumn new width: 20; yourself).
+	divergencesTable addColumn: (SpImageTableColumn new width: 25; evaluated: [ :elem | elem icon ]; yourself).
+	divergencesTable addColumn: ((SpStringTableColumn title: 'Reference' evaluated: [ :elem | self printAutoTypeEcho: elem reference]) width: 200; yourself).
+	divergencesTable addColumn: ((SpStringTableColumn title: 'Modified' evaluated: [ :elem | self printAutoTypeEcho: elem modified]) width: 200; yourself).
+	divergencesTable addColumn: (SpLinkTableColumn new width: 50; evaluated: [ :elem | 'jump' ]; action:[:row| row inspect]; yourself).
+	"divergencesTable displayIcon: [ :elem | elem icon]."
+	
+
+	divergencesTable items: echoResult last.
+	divergencesTable transmitDo: [ :div |
+		div ifNotNil: [
+			referenceStack
+				selectItem: (div reference state ifNil: [0]) 
+				scrollToSelection: true.
+			modifiedStack
+				selectItem: (div modified state ifNil: [0]  )
+				scrollToSelection: true ] ].
+		
+	self initializeMenu.
+	divergencesTable contextMenu: menuTimeTravel 
+]
+
+{ #category : 'initialization' }
 EchoDebuggerPresenter >> initializeEventsBetweenStack: stack andCode: code [
 
 	stack transmitDo: [ :programState |
@@ -129,12 +158,6 @@ EchoDebuggerPresenter >> initializeMenu [
 { #category : 'initialization' }
 EchoDebuggerPresenter >> initializePresenters [
 
-	divergencesList := self newList.
-	divergencesList activateOnDoubleClick whenActivatedDo: [ :div |
-		div selectedItem inspect ].
-	divergencesList displayIcon: [ :elem | elem icon].
-	"divergencesList display:  [ :div | div printString ]."
-	
 
 	modifiedStack := self newList.
 	modifiedCode := self newCode.
@@ -160,18 +183,8 @@ EchoDebuggerPresenter >> initializePresenters [
 		div selectedItem inspect ].
 	modifiedStack selectFirst.
 		
-	divergencesList items: echoResult last.
-	divergencesList transmitDo: [ :div |
-		div ifNotNil: [
-			referenceStack
-				selectItem: (div reference state ifNil: [0]) 
-				scrollToSelection: true.
-			modifiedStack
-				selectItem: (div modified state ifNil: [0]  )
-				scrollToSelection: true ] ].
-		
-	self initializeMenu .
-	divergencesList contextMenu: menuTimeTravel 
+	self initializeDivergenceTable.
+	
 ]
 
 { #category : 'initialization' }
@@ -204,6 +217,18 @@ EchoDebuggerPresenter >> openTimeTravelDebuggerOn: aEchoDivergence [
 	modifiedStack items: result second contextsStack.
 	modifiedStack selectFirst.
 	 '
+]
+
+{ #category : 'printing' }
+EchoDebuggerPresenter >> printAutoTypeEcho: anAutoTypeEcho [
+
+	^ String streamContents: [ :stream |
+		  stream << '[pc: '.
+		  anAutoTypeEcho programCounter printOn: stream.
+		  stream << ']'.
+		  stream space.
+		  stream
+		  << (self printStringWithoutEcho: anAutoTypeEcho node sourceCode) ]
 ]
 
 { #category : 'printing' }
