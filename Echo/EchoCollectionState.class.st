@@ -2,87 +2,87 @@ Class {
 	#name : 'EchoCollectionState',
 	#superclass : 'Object',
 	#instVars : [
-		'badInterpret',
-		'goodInterpret',
-		'goodProgState',
-		'badProgState'
+		'originalInterpret',
+		'modifiedInterpret',
+		'originalProgState',
+		'modifiedProgState'
 	],
 	#category : 'Echo-Core',
 	#package : 'Echo',
 	#tag : 'Core'
 }
 
-{ #category : 'accessing' }
-EchoCollectionState >> badInterpret [
-
-	^ badInterpret
-]
-
-{ #category : 'accessing' }
-EchoCollectionState >> badInterpret: anObject [
-
-	badInterpret := anObject
-]
-
-{ #category : 'accessing' }
-EchoCollectionState >> badProgState [
-
-	^ badProgState
-]
-
-{ #category : 'accessing' }
-EchoCollectionState >> badProgState: anObject [
-
-	badProgState := anObject
-]
-
 { #category : 'as yet unclassified' }
 EchoCollectionState >> collect [
-	goodInterpret isDNU ifTrue: [ goodProgState last dnu: true. goodInterpret dnu: false ] .
-	badInterpret isDNU ifTrue: [ badProgState last dnu: true. badInterpret dnu: false ] .
+	originalInterpret isDNU ifTrue: [ originalProgState last dnu: true. originalInterpret dnu: false ] .
+	modifiedInterpret isDNU ifTrue: [ modifiedProgState last dnu: true. modifiedInterpret dnu: false ] .
 	
-	goodInterpret returnValue ifNotNil: [ goodProgState last returnValue: goodInterpret returnValue . goodInterpret returnValue: nil ] .
-	badInterpret returnValue ifNotNil: [ badProgState last returnValue: badInterpret returnValue . badInterpret returnValue: nil ] .
+	originalInterpret returnValue ifNotNil: [ originalProgState last returnValue: originalInterpret returnValue . originalInterpret returnValue: nil ] .
+	modifiedInterpret returnValue ifNotNil: [ modifiedProgState last returnValue: modifiedInterpret returnValue . modifiedInterpret returnValue: nil ] .
 	
-	goodProgState add: ( DASTProgrammState new state: goodInterpret ).
-	badProgState add: ( DASTProgrammState new state: badInterpret).
-]
-
-{ #category : 'as yet unclassified' }
-EchoCollectionState >> good: interpreterGood bad: interpreterBad [
-
-	goodInterpret := interpreterGood.
-	badInterpret := interpreterBad
-]
-
-{ #category : 'accessing' }
-EchoCollectionState >> goodInterpret [
-
-	^ goodInterpret
-]
-
-{ #category : 'accessing' }
-EchoCollectionState >> goodInterpret: anObject [
-
-	goodInterpret := anObject
-]
-
-{ #category : 'accessing' }
-EchoCollectionState >> goodProgState [
-
-	^ goodProgState
-]
-
-{ #category : 'accessing' }
-EchoCollectionState >> goodProgState: anObject [
-
-	goodProgState := anObject
+	originalProgState add: ( DASTProgrammState new state: originalInterpret ).
+	modifiedProgState add: ( DASTProgrammState new state: modifiedInterpret).
 ]
 
 { #category : 'initialization' }
 EchoCollectionState >> initialize [ 
 
 
-	goodProgState := OrderedCollection new.
-	badProgState := OrderedCollection new.
+	originalProgState := OrderedCollection new.
+	modifiedProgState := OrderedCollection new.
+]
+
+{ #category : 'accessing' }
+EchoCollectionState >> modifiedInterpret [
+
+	^ modifiedInterpret
+]
+
+{ #category : 'accessing' }
+EchoCollectionState >> modifiedInterpret: anObject [
+
+	modifiedInterpret := anObject
+]
+
+{ #category : 'accessing' }
+EchoCollectionState >> modifiedProgState [
+
+	^ modifiedProgState
+]
+
+{ #category : 'accessing' }
+EchoCollectionState >> modifiedProgState: anObject [
+
+	modifiedProgState := anObject
+]
+
+{ #category : 'as yet unclassified' }
+EchoCollectionState >> original: interpreterGood modified: interpreterBad [
+
+	originalInterpret := interpreterGood.
+	modifiedInterpret := interpreterBad
+]
+
+{ #category : 'accessing' }
+EchoCollectionState >> originalInterpret [
+
+	^ originalInterpret
+]
+
+{ #category : 'accessing' }
+EchoCollectionState >> originalInterpret: anObject [
+
+	originalInterpret := anObject
+]
+
+{ #category : 'accessing' }
+EchoCollectionState >> originalProgState [
+
+	^ originalProgState
+]
+
+{ #category : 'accessing' }
+EchoCollectionState >> originalProgState: anObject [
+
+	originalProgState := anObject
 ]

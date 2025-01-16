@@ -2,285 +2,27 @@ Class {
 	#name : 'Echo',
 	#superclass : 'Object',
 	#instVars : [
-		'good',
-		'bad',
-		'interpreterGood',
-		'interpreterBad',
 		'packages',
-		'algo'
+		'modified',
+		'original',
+		'originalInterpreter',
+		'modifiedInterpreter'
 	],
 	#category : 'Echo-Core',
 	#package : 'Echo',
 	#tag : 'Core'
 }
 
-{ #category : 'as yet unclassified' }
-Echo >> analyseDiv: programmState [
+{ #category : 'executing' }
+Echo >> analyse: programmState [
 
-	| asDiv messageDiv creationInstanceDiv result returnDiv |
-
+	| result analyse |
 	result := OrderedCollection new.
-	asDiv := self assignementDiv: programmState.
-	messageDiv := self messageDiv: programmState.
-	"creationInstanceDiv := self creationInstanceDiv: programmState."
-	result addAll: messageDiv .
-	result addAll: asDiv .
-	^ result
-]
+	analyse := EchoAnalyse new.
 
-{ #category : 'as yet unclassified' }
-Echo >> assignementDiv: programmState [
-
-	| goodState badState ttqGood solveGood ttqBad badSolve r assGood assBad r1 size |
-	goodState := programmState goodProgState.
-	badState := programmState badProgState.
-
-
-	ttqGood := TTQAllAssignments queryFrom: goodState.
-	solveGood := QSCollection solve: ttqGood.
-
-	ttqBad := TTQAllAssignments queryFrom: badState.
-	badSolve := QSCollection solve: ttqBad.
-
-	r := OrderedCollection new.
-	
-	^ self divergenceAssignementGood: solveGood bad: badSolve result: r shift: 0.
-	
-	"size := solveGood size max: badSolve size.
-	1 to: size do: [ :a |
-		assGood := solveGood at: a ifAbsent: [ DASTGoodMissing new ].
-		assBad := badSolve at: a ifAbsent: [ DASTBadMissing new ].
-		(assGood programCounter = assBad programCounter and: [
-			 assGood node isEquivalentTo: assBad node ]) ifFalse: [ 1halt.
-			assGoodReconv := badSolve select: [ :ps |ps node isEquivalentTo: assGood node ] first.
-			assBadReconv := (solveGood select: [ :ps |ps node isEquivalentTo: assBad node ] first).
-			r1 := EchoDivergenceAssign reference: assGood modified: assBad.
-
-			r add: r1 ] ].
-
-
-	^ r"
-]
-
-{ #category : 'accessing' }
-Echo >> bad [
-
-	^ bad
-]
-
-{ #category : 'accessing' }
-Echo >> bad: anObject [
-
-	bad := anObject
-]
-
-{ #category : 'as yet unclassified' }
-Echo >> creationInstanceDiv: programmState [
-
-	| goodState badState ttqGood solveGood ttqBad badSolve r assGood assBad r1 size |
-	goodState := programmState goodProgState.
-	badState := programmState badProgState.
-
-	
-	ttqGood := TTQAllInstanceCreations queryFrom: goodState.
-	solveGood := QSCollection solve: ttqGood.
-
-	ttqBad := TTQAllInstanceCreations queryFrom: badState.
-	badSolve := QSCollection solve: ttqBad.
-
-	r := OrderedCollection new.
-	size :=  (solveGood size) max:( badSolve size). 
-	1 to: size do: [ :a |
-		assGood := solveGood at: a ifAbsent: [DASTGoodMissing new].
-		assBad := badSolve at: a ifAbsent: [DASTBadMissing new].
-		r1 := OrderedCollection new.
-		r1 add: assGood.
-		r1 add: assBad.
-		r1 add: assGood programCounter = assBad programCounter.
-		r1 add: (assGood node isEquivalentTo: assBad node).
-		r add: r1 ].
-	^ r
-]
-
-{ #category : 'as yet unclassified' }
-Echo >> divergenceAssignementGood: solveGood bad: solveBad result: result shift: baseShift [
-
-	| assGood assBad reconvGood reconvBad shift |
-	
-	shift := 0.
-	[ solveGood isNotEmpty or: [ solveBad isNotEmpty ] ] whileTrue: [
-		assGood := solveGood at: 1 ifAbsent: [ DASTGoodMissing new ].
-		assBad := solveBad at: 1 ifAbsent: [ DASTBadMissing new ].
-		(assGood programCounter - baseShift = assBad programCounter and: [
-			 assGood node isEquivalentTo: assBad node ]) ifTrue: [ solveGood remove: assGood.
-			solveBad remove: assBad ] ifFalse: [
-			(assGood node isEquivalentTo: assBad node)
-				ifTrue: [
-					result add: (EchoDivergenceAssign
-							 reference: assGood
-							 modified: assBad
-							 flow: true
-							 state: false).
-					solveBad remove: assBad.
-					solveGood remove: assGood.
-					self
-						divergenceAssignementGood: solveGood
-						bad: solveBad
-						result: result
-						shift: assGood programCounter - assBad programCounter ]
-				ifFalse: [
-					reconvGood := (solveBad select:
-						              [ :ps | ps node isEquivalentTo: assGood node ])
-							              at: 1 ifAbsent: [ nil ] .
-					reconvBad := (solveGood select:
-						             [ :ps | ps node isEquivalentTo: assBad node ] )at: 1 ifAbsent: [ nil ].
-					reconvGood
-						ifNil: [(assGood class = DASTBadMissing )ifFalse: [ 
-							result add:  (EchoDivergenceAssign
-								reference: assGood 
-								modified:  DASTBadMissing new 
-								flow: true
-								state: true) .
-								solveGood remove: assGood ]]
-						ifNotNil: [
-							result add: (EchoDivergenceAssign
-								reference: assGood
-								modified: reconvGood
-								flow: true
-								state: false).
-							solveGood remove: assGood.
-							solveBad remove: reconvGood.
-							shift := shift max:
-								         assGood programCounter - reconvGood programCounter ].
-					reconvBad
-						ifNil: [(assBad class = DASTBadMissing )ifFalse: [ 
-							result add: (EchoDivergenceAssign
-								reference: DASTGoodMissing new
-								modified:  assBad 
-								flow: true
-								state: true ).
-								solveBad remove: assBad ]]
-						ifNotNil: [
-							result add: (EchoDivergenceAssign
-								reference: reconvBad
-								modified: assBad
-								flow: true
-								state: false).
-							solveGood remove: reconvBad.
-							solveBad remove: assBad.
-							shift := shift max:
-								         reconvBad programCounter - assBad programCounter ].
-					self
-						divergenceAssignementGood: solveGood
-						bad: solveBad
-						result: result
-						shift: shift ] ] ].
-	^ result
-]
-
-{ #category : 'as yet unclassified' }
-Echo >> divergenceConvergenceGood: solveGood bad: solveBad result: result shift: baseShift [
-
-	| size assGood assBad r1 reconvGood reconvBad collectGood collectBad shift |
-	size := solveGood size max: solveBad size.
-
-	[ solveGood isNotEmpty and: [ solveBad isNotEmpty ] ] whileTrue: [
-		assGood := solveGood at: 1 ifAbsent: [ DASTGoodMissing new ].
-		assBad := solveBad at: 1 ifAbsent: [ DASTBadMissing new ].
-		(assGood programCounter - baseShift = assBad programCounter and: [
-			 assGood node isEquivalentTo: assBad node ]) ifFalse: [shift := assGood programCounter - assBad programCounter.
-			r1 := EchoDivergenceMessage
-				      reference: assGood
-				      modified: assBad
-				      shift: shift.
-			shift := assGood programCounter - assBad programCounter.
-			reconvGood := solveGood select: [ :d |
-				              (d node isEquivalentTo: assBad node) and: [
-					              d programCounter - shift > assBad programCounter ] ].
-			reconvBad := solveBad select: [ :d |
-				             (d node isEquivalentTo: assGood node) and: [
-					             d programCounter - shift > assGood programCounter ] ].
-			reconvGood ifNotEmpty: [
-				collectGood := solveGood select: [ :d |
-					               d programCounter >= assGood programCounter and: [
-						               d programCounter
-						               < reconvGood first programCounter ] ].
-				collectGood do: [ :d | solveGood remove: d ].
-				shift := reconvGood first programCounter - assBad programCounter ].
-			reconvBad ifNotEmpty: [
-				collectBad := solveBad select: [ :d |
-					              d programCounter >= assBad programCounter and: [
-						              d programCounter < reconvGood first programCounter ] ].
-				collectBad do: [ :d | solveBad remove: d ].
-				shift := assGood programCounter - reconvBad first programCounter ].
-			r1 collectGood: collectGood .
-			r1 collectBad: collectBad .
-			result add: r1.
-			^ self
-				  divergenceConvergenceGood: solveGood
-				  bad: solveBad
-				  result: result
-				  shift: shift ].
-		solveBad remove: assBad ifAbsent: [  ].
-		solveGood remove: assGood ifAbsent: [  ] ].
-	^ result
-]
-
-{ #category : 'as yet unclassified' }
-Echo >> divergenceConvergenceGood: solveGood bad: solveBad result: result shift: baseShift goodReturn: goodReturn badReturn: badReturn [
-
-	| size assGood assBad r1 reconvGood reconvBad collectGood collectBad shift |
-	size := solveGood size max: solveBad size.
-	
-	[ solveGood isNotEmpty and: [ solveBad isNotEmpty ] ] whileTrue: [
-		assGood := solveGood at: 1 ifAbsent: [ DASTGoodMissing new ].
-		assBad := solveBad at: 1 ifAbsent: [ DASTBadMissing new ].
-		(assGood programCounter - baseShift = assBad programCounter and: [
-			 (assGood node isEquivalentTo: assBad node) and: [
-				 assGood state dnu = assBad state dnu ] ]) ifFalse: [
-			shift := assGood programCounter - assBad programCounter.
-			r1 := EchoDivergenceMessage
-				      reference: assGood
-				      modified: assBad
-				      shift: shift.
-			shift := assGood programCounter - assBad programCounter.
-			reconvGood := solveGood select: [ :d |
-				              (d node isEquivalentTo: assBad node) and: [
-					              d programCounter - shift > assBad programCounter ] ].
-			reconvBad := solveBad select: [ :d |
-				             (d node isEquivalentTo: assGood node) and: [
-					             d programCounter - shift > assGood programCounter ] ].
-			reconvGood ifNotEmpty: [
-				collectGood := solveGood select: [ :d |
-					               d programCounter >= assGood programCounter and: [
-						               d programCounter
-						               < reconvGood first programCounter ] ].
-				collectGood do: [ :d | solveGood remove: d ].
-				self removeReturn: goodReturn divergence: collectGood.
-				shift := reconvGood first programCounter - assBad programCounter ].
-			reconvBad ifNotEmpty: [
-				collectBad := solveBad select: [ :d |
-					              d programCounter >= assBad programCounter and: [
-						              d programCounter < reconvGood first programCounter ] ].
-				collectBad do: [ :d | solveBad remove: d ].
-				self removeReturn: badReturn divergence: collectBad.
-				shift := assGood programCounter - reconvBad first programCounter ].
-			r1 collectGood: collectGood.
-			r1 collectBad: collectBad.
-			result add: r1.
-			(reconvGood isEmpty and: reconvBad isEmpty) ifTrue: [
-				solveBad remove: assBad ifAbsent: [  ].
-				solveGood remove: assGood ifAbsent: [  ] ].
-
-			^ self
-				  divergenceConvergenceGood: solveGood
-				  bad: solveBad
-				  result: result
-				  shift: shift
-				  goodReturn: goodReturn
-				  badReturn: badReturn ].
-		solveBad remove: assBad ifAbsent: [  ].
-		solveGood remove: assGood ifAbsent: [  ] ].
+	result add: programmState originalProgState.
+	result add: programmState modifiedProgState.
+	result add: (analyse analyseDiv: programmState).
 	^ result
 ]
 
@@ -288,40 +30,26 @@ Echo >> divergenceConvergenceGood: solveGood bad: solveBad result: result shift:
 Echo >> execute [
 
 
-	| programmState result |
-	result := OrderedCollection new.
+	| programmState   |
+
 "	1halt."
 	programmState := EchoCollectionState new.
-	interpreterGood := DASTInterpreter new.
-	interpreterGood initializeWithProgram: ((RBParser parseExpression: good)).
-	interpreterBad := DASTInterpreter new.
-	interpreterBad initializeWithProgram: ((RBParser parseExpression: bad)).
-	programmState good: interpreterGood bad: interpreterBad . 
-	algo good: interpreterGood bad: interpreterBad .
+	originalInterpreter := DASTInterpreter new.
+	originalInterpreter initializeWithProgram: ((RBParser parseExpression: original)).
+	modifiedInterpreter := DASTInterpreter new.
+	modifiedInterpreter initializeWithProgram: ((RBParser parseExpression: modified)).
+	programmState original: originalInterpreter modified: modifiedInterpreter . 
 "	1halt ."
-	[ interpreterGood isTerminated not or: [interpreterBad  isTerminated not ]] whileTrue: [ 
+	[ originalInterpreter isTerminated not or: [modifiedInterpreter  isTerminated not ]] whileTrue: [ 
 	"algo algoDiff."
-	('je suis au pc ' ,  interpreterGood programCounter asString ) traceCr.
-	1 haltIf: [ interpreterGood programCounter = 600000 ].
+	('je suis au pc ' ,  originalInterpreter programCounter asString ) traceCr.
+	1 haltIf: [ originalInterpreter programCounter = 600000 ].
 	self step.
 	programmState collect].
-	result add: programmState goodProgState .
-	result add: programmState badProgState .
-	result add: (self analyseDiv: programmState ).
-	^ result
 
-]
+	^ self analyse: programmState
 
-{ #category : 'accessing' }
-Echo >> good [
 
-	^ good
-]
-
-{ #category : 'accessing' }
-Echo >> good: anObject [
-
-	good := anObject
 ]
 
 { #category : 'as yet unclassified' }
@@ -342,39 +70,28 @@ Echo >> importGoodRepository: aString baseline: aStringBaseline [
 		loadGood .
 ]
 
-{ #category : 'initialization' }
-Echo >> initialize [ 
+{ #category : 'accessing' }
+Echo >> modified [
 
-	algo := EchoAlgo new.
-
+	^ modified
 ]
 
-{ #category : 'as yet unclassified' }
-Echo >> messageDiv: programmState [
+{ #category : 'accessing' }
+Echo >> modified: anObject [
 
-	| goodState badState ttqGood solveGood ttqBad badSolve r shift ttqGoodReturn solveGoodReturn ttqBadReturn solveBadReturn |
-	goodState := programmState goodProgState.
-	badState := programmState badProgState.
+	modified := anObject
+]
 
+{ #category : 'accessing' }
+Echo >> original [
 
-	ttqGood := TTQAllMessage queryFrom: goodState.
-	solveGood := QSCollection solve: ttqGood.
+	^ original
+]
 
-	ttqBad := TTQAllMessage queryFrom: badState.
-	badSolve := QSCollection solve: ttqBad.
-	
-	ttqGoodReturn := TTQAllReturn queryFrom: goodState.
-	solveGoodReturn := QSCollection solve: ttqGoodReturn.
+{ #category : 'accessing' }
+Echo >> original: anObject [
 
-	ttqBadReturn := TTQAllReturn queryFrom: badState.
-	solveBadReturn := QSCollection solve: ttqBadReturn.
-
-	shift := 0.
-	r := OrderedCollection new.
-	
-	self divergenceConvergenceGood: solveGood bad: badSolve result: r shift: shift goodReturn: solveGoodReturn badReturn: solveBadReturn .
-		r addAll:(self  returnDivGood: solveGoodReturn bad: solveBadReturn) .
-	^r 
+	original := anObject
 ]
 
 { #category : 'accessing' }
@@ -389,105 +106,56 @@ Echo >> packages: anObject [
 	packages := anObject
 ]
 
-{ #category : 'removing' }
-Echo >> removeReturn: return divergence: diverge [
-
-	| result |
-	result := OrderedCollection new.
-	diverge do: [ :d |
-		return
-			select: [ :r |
-				(r state currentContext messageNode ifNil: [ DASTNilNode new ])
-					isEquivalentTo: d node ]
-			thenDo: [ :r | result add: r ] ].
-	result removeDuplicates.
-	result do: [ :r | return remove: r ]
-]
-
-{ #category : 'as yet unclassified' }
-Echo >> returnDivGood: goodReturn bad: badReturn [
-
-	| returnGood returnBad result checkReturnGood checkReturnBad |
-	
-	result := OrderedCollection new.
-	[ goodReturn isNotEmpty or: [ goodReturn isNotEmpty ] ] whileTrue: [
-		returnGood := goodReturn at: 1 ifAbsent: [ DASTGoodMissing new ].
-		returnBad := badReturn at: 1 ifAbsent: [ DASTBadMissing new ].
-		((returnGood node isEquivalentTo: returnBad node) and: [
-			 self
-				 returnGood: returnGood state returnValue
-				 equivalentBad: returnBad state returnValue ])
-			ifTrue: [
-				goodReturn remove: returnGood ifAbsent: [  ].
-				badReturn remove: returnBad ifAbsent: [  ] ]
-			ifFalse: [
-				(returnGood node isEquivalentTo: returnBad node)
-					ifTrue: [
-						result add: (EchoDivergenceReturn new
-								 returnGood: returnGood;
-								 returnBad: returnBad;
-								 yourself).
-						goodReturn remove: returnGood ifAbsent: [  ].
-						badReturn remove: returnBad ifAbsent: [  ] ]
-					ifFalse: [
-						1 halt.
-						checkReturnGood := badReturn select: [ :b |
-							                   b node isEquivalentTo: returnGood node ].
-						checkReturnBad := goodReturn select: [ :b |
-							                  b node isEquivalentTo: returnBad node ].
-						checkReturnGood ifEmpty: [
-							result add: (EchoDivergenceReturn new
-									 returnGood: returnGood;
-									 yourself).
-							goodReturn remove: returnGood ifAbsent: [  ] ].
-						checkReturnBad ifEmpty: [
-							result add: (EchoDivergenceReturn new
-									 returnBad: returnBad;
-									 yourself).
-							badReturn remove: returnBad ifAbsent: [  ] ] ] ] ].
-			
-		^ result 
-]
-
-{ #category : 'as yet unclassified' }
-Echo >> returnGood: aGoodValue  equivalentBad: aBadValue [
-
-
-	aGoodValue = aBadValue ifFalse: [ 
-		^  (aGoodValue class name , '_echo') = (aBadValue class name ) ].
-	^ true.
-		
-		 
-
-]
-
 { #category : 'executing' }
 Echo >> step [
 
-	interpreterGood isTerminated ifFalse: [ interpreterGood stepInto ].
+	originalInterpreter isTerminated ifFalse: [ originalInterpreter stepInto ].
 
-	interpreterBad isTerminated ifFalse: [ interpreterBad stepInto ]
+	modifiedInterpreter isTerminated ifFalse: [ modifiedInterpreter stepInto ]
 ]
 
 { #category : 'executing' }
 Echo >> stepTo: aGoodProgramCounter bad: aBadProgramCounter [
 
-	[interpreterGood programCounter < aGoodProgramCounter] whileTrue: [ 
-		interpreterGood stepInto ].
-	[interpreterBad programCounter < aBadProgramCounter] whileTrue: [ 
-		interpreterBad stepInto ].
-^ OrderedCollection new add: interpreterGood ; add: interpreterBad ; yourself
+	[originalInterpreter programCounter < aGoodProgramCounter] whileTrue: [ 
+		originalInterpreter stepInto ].
+	[modifiedInterpreter programCounter < aBadProgramCounter] whileTrue: [ 
+		modifiedInterpreter stepInto ].
+^ OrderedCollection new add: originalInterpreter ; add: modifiedInterpreter ; yourself
+
+]
+
+{ #category : 'executing' }
+Echo >> stepTo: aGoodProgramCounter modified: aBadProgramCounter [
+
+	[originalInterpreter programCounter < aGoodProgramCounter] whileTrue: [ 
+		originalInterpreter stepInto ].
+	[modifiedInterpreter programCounter < aBadProgramCounter] whileTrue: [ 
+		modifiedInterpreter stepInto ].
+^ OrderedCollection new add: originalInterpreter ; add: modifiedInterpreter ; yourself
 
 ]
 
 { #category : 'executing' }
 Echo >> timeTravelGood: aGoodProgramCounter bad: aBadProgramCounter [
 
-	interpreterGood := DASTInterpreter new.
-	interpreterGood initializeWithProgram: ((RBParser parseExpression: good)).
-	interpreterBad := DASTInterpreter new.
-	interpreterBad initializeWithProgram: ((RBParser parseExpression: bad)). 
+	originalInterpreter := DASTInterpreter new.
+	originalInterpreter initializeWithProgram: ((RBParser parseExpression: original)).
+	modifiedInterpreter := DASTInterpreter new.
+	modifiedInterpreter initializeWithProgram: ((RBParser parseExpression: modified)). 
    ^ self stepTo: aGoodProgramCounter bad:aBadProgramCounter
+
+
+]
+
+{ #category : 'executing' }
+Echo >> timeTravelGood: aGoodProgramCounter modified: aBadProgramCounter [
+
+	originalInterpreter := DASTInterpreter new.
+	originalInterpreter initializeWithProgram: ((RBParser parseExpression: original)).
+	modifiedInterpreter := DASTInterpreter new.
+	modifiedInterpreter initializeWithProgram: ((RBParser parseExpression: modified)). 
+   ^ self stepTo: aGoodProgramCounter modified:aBadProgramCounter
 
 
 ]
