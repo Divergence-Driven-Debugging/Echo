@@ -1,7 +1,7 @@
-Extension { #name : 'ASTVariableNode' }
+Extension { #name : 'OCVariableNode' }
 
 { #category : '*Echo' }
-ASTVariableNode >> = anObject [
+OCVariableNode >> = anObject [
 	self == anObject ifTrue: [^true].
 	((anObject isKindOf: self class) or: [self isKindOf: anObject class])
 		ifFalse: [^false].
