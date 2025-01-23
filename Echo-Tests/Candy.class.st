@@ -21,6 +21,13 @@ Candy >> cake [
 ]
 
 { #category : 'as yet unclassified' }
+Candy >> candy [ 
+
+	self sugar.
+	self chocolat 
+]
+
+{ #category : 'as yet unclassified' }
 Candy >> chocolat [
 
 	chocolate := 5

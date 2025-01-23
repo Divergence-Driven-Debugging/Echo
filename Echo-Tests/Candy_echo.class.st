@@ -20,6 +20,14 @@ Candy_echo >> cake [
 	self cocoa 
 ]
 
+{ #category : 'as yet unclassified' }
+Candy_echo >> candy [ 
+
+	self chocolat .
+	sugar:=3.
+	
+]
+
 { #category : 'accessing - structure variables' }
 Candy_echo >> cocoa [ 
 
