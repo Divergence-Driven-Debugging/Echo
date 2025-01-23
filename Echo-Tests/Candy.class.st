@@ -9,3 +9,32 @@ Class {
 	#package : 'Echo-Tests',
 	#tag : 'Core'
 }
+
+{ #category : 'as yet unclassified' }
+Candy >> cacao [ 
+]
+
+{ #category : 'as yet unclassified' }
+Candy >> cake [
+
+	self cacao
+]
+
+{ #category : 'as yet unclassified' }
+Candy >> chocolat [
+
+	chocolate := 5
+]
+
+{ #category : 'as yet unclassified' }
+Candy >> make [
+
+	self chocolat.
+	sugar := 4
+]
+
+{ #category : 'accessing' }
+Candy >> sugar [
+	
+	sugar := 3.
+]

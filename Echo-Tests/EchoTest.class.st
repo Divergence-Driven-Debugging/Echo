@@ -8,3 +8,67 @@ Class {
 	#package : 'Echo-Tests',
 	#tag : 'Core'
 }
+
+{ #category : 'tests' }
+EchoTest >> testDivergenceOnAssignement [
+
+	| echo execute |
+	echo := Echo new.
+
+	echo original: 'Candy new sugar'.
+	echo modified: 'Candy_echo new sugar'.
+	echo packages: { 'Echo' asPackage }.
+
+
+	execute := echo execute.
+	
+	"oui il y a deux divergence car le sucre ne converge pas, mais je ne pense pas que ce soit logique "
+	self assert: execute last size equals: 2
+]
+
+{ #category : 'tests' }
+EchoTest >> testDivergenceOnAssignementWithFlow [
+
+	| echo execute |
+	echo := Echo new.
+
+	echo original: 'Candy new make'.
+	echo modified: 'Candy_echo new make'.
+	echo packages: { 'Echo' asPackage }.
+
+
+	execute := echo execute.
+	
+
+	self assert: execute last size equals: 3
+]
+
+{ #category : 'tests' }
+EchoTest >> testDivergenceOnflow [
+
+	| echo execute |
+	echo := Echo new.
+
+	echo original: 'Candy new cake'.
+	echo modified: 'Candy_echo new cake'.
+	echo packages: { 'Echo' asPackage }.
+
+
+	execute := echo execute.
+	self assert: execute last size equals: 1
+]
+
+{ #category : 'tests' }
+EchoTest >> testGoodCollectOfProgramState [
+
+	| echo execute |
+	echo := Echo new.
+
+	echo original: 'Candy new make'.
+	echo modified: 'Candy_echo new make'.
+	echo packages: { 'Echo' asPackage }.
+
+
+	execute := echo execute.
+	self assert: execute first size equals: execute second size
+]
