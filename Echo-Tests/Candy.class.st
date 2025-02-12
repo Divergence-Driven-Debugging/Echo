@@ -21,16 +21,22 @@ Candy >> cake [
 ]
 
 { #category : 'as yet unclassified' }
-Candy >> candy [ 
+Candy >> chocoGuimmauve [
 
-	self sugar.
-	self chocolat 
+	self chocolat .
+	self guimmauve 
 ]
 
 { #category : 'as yet unclassified' }
 Candy >> chocolat [
 
 	chocolate := 5
+]
+
+{ #category : 'as yet unclassified' }
+Candy >> guimmauve [
+
+	self sugar.
 ]
 
 { #category : 'as yet unclassified' }

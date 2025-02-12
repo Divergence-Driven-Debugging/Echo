@@ -21,11 +21,10 @@ Candy_echo >> cake [
 ]
 
 { #category : 'as yet unclassified' }
-Candy_echo >> candy [ 
+Candy_echo >> chocoGuimmauve [
 
-	self chocolat .
-	sugar:=3.
-	
+	self guimmauve .
+	self  chocolat 
 ]
 
 { #category : 'accessing - structure variables' }
@@ -37,7 +36,13 @@ Candy_echo >> cocoa [
 { #category : 'searching' }
 Candy_echo >> doesNotUnderstand: aMessage [
 
-	chocolate := 5
+	chocolate := 2
+]
+
+{ #category : 'as yet unclassified' }
+Candy_echo >> guimmauve [
+
+	self sugar.
 ]
 
 { #category : 'searching' }

@@ -5,8 +5,7 @@ Class {
 		'packages',
 		'modified',
 		'original',
-		'originalInterpreter',
-		'modifiedInterpreter'
+		'recorder'
 	],
 	#category : 'Echo-Core',
 	#package : 'Echo',
@@ -14,15 +13,15 @@ Class {
 }
 
 { #category : 'executing' }
-Echo >> analyse: programmState [
+Echo >> analyse [
 
 	| result analyse |
 	result := OrderedCollection new.
 	analyse := EchoAnalyse new.
 
-	result add: programmState originalProgState.
-	result add: programmState modifiedProgState.
-	result add: (analyse analyseDiv: programmState).
+	result add: recorder originalTrace.
+	result add: recorder modifiedTrace .
+	result add: (analyse analyseDiv: recorder).
 	^ result
 ]
 
@@ -33,21 +32,22 @@ Echo >> execute [
 	| programmState   |
 
 "	1halt."
-	programmState := EchoCollectionState new.
+	"programmState := EchoCollectionState new.
 	originalInterpreter := DASTInterpreter new.
 	originalInterpreter initializeWithProgram: ((RBParser parseExpression: original)).
 	modifiedInterpreter := DASTInterpreter new.
 	modifiedInterpreter initializeWithProgram: ((RBParser parseExpression: modified)).
 	programmState original: originalInterpreter modified: modifiedInterpreter . 
-"	1halt ."
+	
 	[ originalInterpreter isTerminated not or: [modifiedInterpreter  isTerminated not ]] whileTrue: [ 
-	"algo algoDiff."
 	('je suis au pc ' ,  originalInterpreter programCounter asString ) traceCr.
 	1 haltIf: [ originalInterpreter programCounter = 600000 ].
 	self step.
-	programmState collect].
-
-	^ self analyse: programmState
+	programmState collect]."
+	recorder := SCOPEOTraceRecorder original: original modified: modified.
+	recorder packages: packages .
+	recorder execute.
+	^ self analyse
 
 
 ]

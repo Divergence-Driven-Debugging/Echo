@@ -1,6 +1,13 @@
 Extension { #name : 'Object' }
 
 { #category : '*Echo' }
+Object >> name [
+
+	^ self className 
+	
+]
+
+{ #category : '*Echo' }
 Object >> package [
     ^ self class package
 ]

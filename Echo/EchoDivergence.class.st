@@ -41,8 +41,8 @@ EchoDivergence >> icon [
 { #category : 'initialization' }
 EchoDivergence >> initialize [ 
 
-	reference := DASTGoodMissing new.
-	modified := DASTBadMissing  new.
+	reference := EchoMissingTrace new.
+	modified := EchoMissingTrace  new.
 ]
 
 { #category : 'accessing' }

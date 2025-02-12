@@ -7,13 +7,13 @@ Class {
 }
 
 { #category : 'as yet unclassified' }
-EchoAnalyse >> analyseDiv: programmState [
+EchoAnalyse >> analyseDiv: recorder [
 
 	| asDiv messageDiv result |
 
 	result := OrderedCollection new.
-	asDiv := self assignementDiv: programmState.
-	messageDiv := self messageDiv: programmState.
+	asDiv := self assignementDiv:recorder.
+	messageDiv := self messageDiv:recorder .
 	"creationInstanceDiv := self creationInstanceDiv: programmState."
 	result addAll: messageDiv .
 	result addAll: asDiv .
@@ -21,19 +21,15 @@ EchoAnalyse >> analyseDiv: programmState [
 ]
 
 { #category : 'as yet unclassified' }
-EchoAnalyse >> assignementDiv: programmState [
+EchoAnalyse >> assignementDiv: recorder [
 
-	| originalState modifiedState ttqGood solveGood ttqBad modifiedSolve r |
-	originalState := programmState originalProgState.
-	modifiedState := programmState modifiedProgState.
+	| originalState modifiedState solveGood ttqBad modifiedSolve r  |
 
+	solveGood := recorder originalTrace  select: [ :t | t isAssignmentTrace ] .
 
-	ttqGood := TTQAllAssignments queryFrom: originalState.
-	solveGood := QSCollection solve: ttqGood.
-
-	ttqBad := TTQAllAssignments queryFrom: modifiedState.
-	modifiedSolve := QSCollection solve: ttqBad.
-
+	modifiedSolve := recorder modifiedTrace select: [ :t | t isAssignmentTrace ] .
+	
+	
 	r := OrderedCollection new.
 	
 	^ self divergenceAssignementGood: solveGood modified: modifiedSolve result: r shift: 0.
@@ -41,15 +37,68 @@ EchoAnalyse >> assignementDiv: programmState [
 
 ]
 
-{ #category : 'diff' }
-EchoAnalyse >> checkSlotValue: originalSlot bad: badSlot [ 
-	
+{ #category : 'as yet unclassified' }
+EchoAnalyse >> checkAssignementOriginal: assGood modified: assBad [
+	"(assGood programCounter - baseShift = assBad programCounter and: [
+			 assGood node isEquivalentTo: assBad node ]) "
 
-	| diff result|
+	^ EquivalentObject new object: assGood object isEquivalent: assBad object
+	
+]
+
+{ #category : 'as yet unclassified' }
+EchoAnalyse >> checkContentMessage: assGood modified: assBad [
+
+	^ (((self
+		     checkNameOfClassOriginal: assGood sender
+		     modified: assBad sender) and: [
+		    self
+			    checkNameOfClassOriginal: assGood receiver
+			    modified: assBad receiver ]) and: [
+		   assGood arguments = assBad arguments ]) and: [
+		  assGood selector = assBad selector ]
+]
+
+{ #category : 'as yet unclassified' }
+EchoAnalyse >> checkFlowOriginal:assGood modified:assBad shift: aShift [
+
+	^ assGood position - (assBad position) - aShift = 0
+]
+
+{ #category : 'as yet unclassified' }
+EchoAnalyse >> checkMessageOriginal: assGood modified: assBad [
+
+	^ self checkContentMessage: assGood modified: assBad
+]
+
+{ #category : 'as yet unclassified' }
+EchoAnalyse >> checkMessageOriginal: assGood modified: assBad shift: aShift [
+
+	^ (self checkContentMessage: assGood modified: assBad) and:[self checkFlowOriginal:assGood modified:assBad shift: aShift ]
+]
+
+{ #category : 'as yet unclassified' }
+EchoAnalyse >> checkNameOfClassOriginal: original modified: modified [
+
+
+	original = modified ifTrue: [ ^ true ].
+	^ original name  = (modified name , '_echo') or: [
+		  modified name  = (original name  , '_echo') ]
+]
+
+{ #category : 'diff' }
+EchoAnalyse >> checkSlotValue: originalSlot bad: badSlot [
+
+	| diff result |
 	result := OrderedCollection new.
-	diff := originalSlot keys select: [ :s | ((originalSlot at: s ) = (badSlot at: s )) not].
-	diff ifNotEmpty: [ result := diff select: [ :s | (self checkSlotValue: ((originalSlot at: s) slotsValue)  bad: ((badSlot at: s) slotsValue) )not] ].
-	^ result isEmpty 
+	diff := originalSlot keys select: [ :s |
+		        (originalSlot at: s) ~= (badSlot at: s) ].
+	diff ifNotEmpty: [
+		result := diff reject: [ :s |
+			          self
+				          checkSlotValue: (originalSlot at: s) slotsValue
+				          bad: (badSlot at: s) slotsValue ] ].
+	^ result isEmpty
 ]
 
 { #category : 'diff' }
@@ -171,75 +220,35 @@ EchoAnalyse >> divergenceAssignementGood: solveGood bad: solveBad result: result
 EchoAnalyse >> divergenceAssignementGood: solveGood modified: solveBad result: result shift: baseShift [
 
 	| assGood assBad reconvGood reconvBad shift |
-	
 	shift := 0.
 	[ solveGood isNotEmpty or: [ solveBad isNotEmpty ] ] whileTrue: [
-		assGood := solveGood at: 1 ifAbsent: [ DASTGoodMissing new ].
-		assBad := solveBad at: 1 ifAbsent: [ DASTBadMissing new ].
-		(assGood programCounter - baseShift = assBad programCounter and: [
-			 assGood node isEquivalentTo: assBad node ]) ifTrue: [ solveGood remove: assGood.
-			solveBad remove: assBad ] ifFalse: [
-			(assGood node isEquivalentTo: assBad node)
-				ifTrue: [
-					result add: (EchoDivergenceAssign
-							 reference: assGood
-							 modified: assBad
-							 flow: true
-							 state: false).
-					solveBad remove: assBad.
-					solveGood remove: assGood.
-					self
-						divergenceAssignementGood: solveGood
-						modified: solveBad
-						result: result
-						shift: assGood programCounter - assBad programCounter ]
-				ifFalse: [
-					reconvGood := (solveBad select:
-						              [ :ps | ps node isEquivalentTo: assGood node ])
-							              at: 1 ifAbsent: [ nil ] .
-					reconvBad := (solveGood select:
-						             [ :ps | ps node isEquivalentTo: assBad node ] )at: 1 ifAbsent: [ nil ].
-					reconvGood
-						ifNil: [(assGood class = DASTBadMissing )ifFalse: [ 
-							result add:  (EchoDivergenceAssign
-								reference: assGood 
-								modified:  DASTBadMissing new 
-								flow: true
-								state: true) .
-								solveGood remove: assGood ]]
-						ifNotNil: [
-							result add: (EchoDivergenceAssign
-								reference: assGood
-								modified: reconvGood
-								flow: true
-								state: false).
-							solveGood remove: assGood.
-							solveBad remove: reconvGood.
-							shift := shift max:
-								         assGood programCounter - reconvGood programCounter ].
-					reconvBad
-						ifNil: [(assBad class = DASTBadMissing )ifFalse: [ 
-							result add: (EchoDivergenceAssign
-								reference: DASTGoodMissing new
-								modified:  assBad 
-								flow: true
-								state: true ).
-								solveBad remove: assBad ]]
-						ifNotNil: [
-							result add: (EchoDivergenceAssign
-								reference: reconvBad
-								modified: assBad
-								flow: true
-								state: false).
-							solveGood remove: reconvBad.
-							solveBad remove: assBad.
-							shift := shift max:
-								         reconvBad programCounter - assBad programCounter ].
-					self
-						divergenceAssignementGood: solveGood
-						modified: solveBad
-						result: result
-						shift: shift ] ] ].
+		assGood := solveGood at: 1 ifAbsent: [ EchoMissingTrace new ].
+		assBad := solveBad at: 1 ifAbsent: [ EchoMissingTrace new ].
+		(self checkAssignementOriginal: assGood modified: assBad)
+			ifTrue: [
+				solveGood remove: assGood.
+				solveBad remove: assBad ]
+			ifFalse: [
+				reconvGood := (solveBad select: [ :ps |
+					               self
+						               checkAssignementOriginal: assGood
+						               modified: ps ]) at: 1 ifAbsent: [ nil ].
+				reconvBad := (solveGood select: [ :ps |
+					              self checkAssignementOriginal: ps modified: assBad ])
+					             at: 1
+					             ifAbsent: [ nil ].
+				shift := reconvGood
+					         reference: assGood
+					         result: result
+					         solveurOriginal: solveGood
+					         solveurModified: solveBad
+					         shift: baseShift.
+				shift := reconvBad
+					         modified: assBad
+					         result: result
+					         solveurOriginal: solveGood
+					         solveurModified: solveBad
+					         shift: baseShift ] ].
 	^ result
 ]
 
@@ -422,47 +431,40 @@ EchoAnalyse >> divergenceConvergenceGood: solveGood modified: solveBad result: r
 
 	| size assGood assBad r1 reconvGood reconvBad collectGood collectBad shift |
 	size := solveGood size max: solveBad size.
-	
+
 	[ solveGood isNotEmpty and: [ solveBad isNotEmpty ] ] whileTrue: [
-		assGood := solveGood at: 1 ifAbsent: [ DASTGoodMissing new ].
-		assBad := solveBad at: 1 ifAbsent: [ DASTBadMissing new ].
-		(assGood programCounter - baseShift = assBad programCounter and: [
-			 (assGood node isEquivalentTo: assBad node) and: [
-				 assGood state dnu = assBad state dnu ] ]) ifFalse: [
-			shift := assGood programCounter - assBad programCounter.
+		assGood := solveGood at: 1 ifAbsent: [ EchoMissingTrace new ].
+		assBad := solveBad at: 1 ifAbsent: [ EchoMissingTrace new ].
+		(self
+			 checkMessageOriginal: assGood
+			 modified: assBad
+			 shift: baseShift) ifFalse: [
+			1 halt.
+
 			r1 := EchoDivergenceMessage
 				      reference: assGood
 				      modified: assBad
 				      shift: shift.
-			shift := assGood programCounter - assBad programCounter.
 			reconvGood := solveGood select: [ :d |
-				              (d node isEquivalentTo: assBad node) and: [
-					              d programCounter - shift > assBad programCounter ] ].
-			reconvBad := solveBad select: [ :d |
-				             (d node isEquivalentTo: assGood node) and: [
-					             d programCounter - shift > assGood programCounter ] ].
+				              self checkMessageOriginal: d modified: assBad ].
+
 			reconvGood ifNotEmpty: [
-				collectGood := solveGood select: [ :d |
-					               d programCounter >= assGood programCounter and: [
-						               d programCounter
-						               < reconvGood first programCounter ] ].
-				collectGood do: [ :d | solveGood remove: d ].
-				self removeReturn: originalReturn divergence: collectGood.
-				shift := reconvGood first programCounter - assBad programCounter ].
-			reconvBad ifNotEmpty: [
-				collectBad := solveBad select: [ :d |
-					              d programCounter >= assBad programCounter and: [
-						              d programCounter < reconvGood first programCounter ] ].
-				collectBad do: [ :d | solveBad remove: d ].
-				self removeReturn: modifiedReturn divergence: collectBad.
-				shift := assGood programCounter - reconvBad first programCounter ].
-			r1 collectGood: collectGood.
-			r1 collectBad: collectBad.
+				reconvGood do: [ :d | solveGood remove: d ] ].
+
+			reconvBad := solveBad select: [ :d |
+				             self checkMessageOriginal: assGood modified: d ].
+			reconvBad ifNotEmpty: [ reconvBad do: [ :d | solveBad remove: d ] ].
+
+
+			r1 collectGood: reconvGood.
+			r1 collectBad: reconvBad.
 			result add: r1.
 			(reconvGood isEmpty and: reconvBad isEmpty) ifTrue: [
 				solveBad remove: assBad ifAbsent: [  ].
 				solveGood remove: assGood ifAbsent: [  ] ].
-
+			shift := baseShift + reconvGood firstOrNil position - assBad position.
+			solveBad remove: assBad ifAbsent: [  ].
+			solveGood remove: assGood ifAbsent: [  ].
 			^ self
 				  divergenceConvergenceGood: solveGood
 				  modified: solveBad
@@ -476,30 +478,25 @@ EchoAnalyse >> divergenceConvergenceGood: solveGood modified: solveBad result: r
 ]
 
 { #category : 'as yet unclassified' }
-EchoAnalyse >> messageDiv: programmState [
+EchoAnalyse >> messageDiv: recorder [
 
 	| originalState modifiedState ttqGood solveGood ttqBad modifiedSolve r shift ttqGoodReturn solveGoodReturn ttqBadReturn solveBadReturn |
-	originalState := programmState originalProgState.
-	modifiedState := programmState modifiedProgState.
-
-
-	ttqGood := TTQAllMessage queryFrom: originalState.
-	solveGood := QSCollection solve: ttqGood.
-
-	ttqBad := TTQAllMessage queryFrom: modifiedState.
-	modifiedSolve := QSCollection solve: ttqBad.
 	
-	ttqGoodReturn := TTQAllReturn queryFrom: originalState.
+	solveGood := recorder originalTrace  select: [ :t | t isMessageTrace ] .
+
+	modifiedSolve := recorder modifiedTrace select: [ :t | t isMessageTrace ].
+	
+	"ttqGoodReturn := TTQAllReturn queryFrom: originalState.
 	solveGoodReturn := QSCollection solve: ttqGoodReturn.
 
 	ttqBadReturn := TTQAllReturn queryFrom: modifiedState.
-	solveBadReturn := QSCollection solve: ttqBadReturn.
+	solveBadReturn := QSCollection solve: ttqBadReturn."
 
 	shift := 0.
 	r := OrderedCollection new.
 	
 	self divergenceConvergenceGood: solveGood modified: modifiedSolve result: r shift: shift originalReturn: solveGoodReturn modifiedReturn: solveBadReturn .
-		r addAll:(self  returnDivGood: solveGoodReturn modified: solveBadReturn) .
+		"r addAll:(self  returnDivGood: solveGoodReturn modified: solveBadReturn) ".
 	^r 
 ]
 

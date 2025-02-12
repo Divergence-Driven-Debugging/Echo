@@ -26,7 +26,7 @@ EchoLoader >> loadBad [
 		             load.
 
 	packages := (IceRepository repositoryNamed:
-		             'Pharo-Pillar-Bug') workingCopy packageNames.
+		             'PillarConfigBug_Failing') workingCopy packageNames.
 
 	packages := packages collect: [ :p | p asPackage ].
 

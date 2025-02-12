@@ -14,13 +14,12 @@ EchoTest >> testDivergenceOnAssignement [
 
 	| echo execute |
 	echo := Echo new.
-
-	echo original: 'Candy new sugar'.
-	echo modified: 'Candy_echo new sugar'.
-	echo packages: { 'Echo' asPackage }.
-
+ 
+	echo original: [Candy new sugar].
+	echo modified: [Candy_echo new sugar].
 
 	execute := echo execute.
+	1halt.
 	
 	"oui il y a deux divergence car le sucre ne converge pas, mais je ne pense pas que ce soit logique "
 	self assert: execute last size equals: 2
@@ -32,14 +31,15 @@ EchoTest >> testDivergenceOnAssignementWithFlow [
 	| echo execute |
 	echo := Echo new.
 
-	echo original: 'Candy new make'.
-	echo modified: 'Candy_echo new make'.
-	echo packages: { 'Echo' asPackage }.
+	echo original: [Candy new make].
+	echo modified: [Candy_echo new make].
+
 
 
 	execute := echo execute.
 	
-
+	1halt. 
+	"oui 3 car le dnu nést pas capter par scopeo pour línstant"
 	self assert: execute last size equals: 3
 ]
 
@@ -49,10 +49,8 @@ EchoTest >> testDivergenceOnflow [
 	| echo execute |
 	echo := Echo new.
 
-	echo original: 'Candy new cake'.
-	echo modified: 'Candy_echo new cake'.
-	echo packages: { 'Echo' asPackage }.
-
+	echo original: [Candy new cake].
+	echo modified: [Candy_echo new cake].
 
 	execute := echo execute.
 	self assert: execute last size equals: 1
@@ -64,11 +62,24 @@ EchoTest >> testGoodCollectOfProgramState [
 	| echo execute |
 	echo := Echo new.
 
-	echo original: 'Candy new make'.
-	echo modified: 'Candy_echo new make'.
+	echo original: [Candy new make].
+	echo modified: [Candy_echo new make].
 	echo packages: { 'Echo' asPackage }.
 
 
 	execute := echo execute.
 	self assert: execute first size equals: execute second size
+]
+
+{ #category : 'tests' }
+EchoTest >> testReconvergemceOnflow [
+
+	| echo execute |
+	echo := Echo new.
+
+	echo original: [Candy new chocoGuimmauve ].
+	echo modified: [Candy_echo new chocoGuimmauve ].
+
+	execute := echo execute.
+	self assert: execute last size equals: 5
 ]

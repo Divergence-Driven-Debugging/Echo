@@ -3,9 +3,9 @@ Extension { #name : 'UndefinedObject' }
 { #category : '*Echo' }
 UndefinedObject >> modified: assBad result: result solveurOriginal: solveGood solveurModified: solveBad shift: baseShift [
 
-	assBad class = DASTBadMissing ifTrue: [ ^ baseShift ].
+	assBad class = EchoMissingTrace ifTrue: [ ^ baseShift ].
 	result add: (EchoDivergenceAssign
-			 reference: DASTGoodMissing new
+			 reference: EchoMissingTrace new
 			 modified: assBad
 			 flow: true
 			 state: true).
@@ -14,12 +14,18 @@ UndefinedObject >> modified: assBad result: result solveurOriginal: solveGood so
 ]
 
 { #category : '*Echo' }
+UndefinedObject >> position [
+
+	 ^ 0
+]
+
+{ #category : '*Echo' }
 UndefinedObject >> reference: assGood result: result solveurOriginal: solveGood solveurModified: solveBad shift: baseShift [
 
-	assGood class = DASTBadMissing ifTrue: [ ^ baseShift ].
+	assGood class = EchoMissingTrace ifTrue: [ ^ baseShift ].
 	result add: (EchoDivergenceAssign
 			 reference: assGood
-			 modified: DASTBadMissing new
+			 modified: EchoMissingTrace new
 			 flow: true
 			 state: true).
 	solveGood remove: assGood.
