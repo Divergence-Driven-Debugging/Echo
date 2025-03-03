@@ -1,6 +1,12 @@
 Extension { #name : 'Object' }
 
 { #category : '*Echo' }
+Object >> allSlots [
+
+	 ^ self class allSlots
+]
+
+{ #category : '*Echo' }
 Object >> name [
 
 	^ self className 
