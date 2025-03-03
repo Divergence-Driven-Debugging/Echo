@@ -1,9 +1,9 @@
 Class {
 	#name : 'EchoDivergenceReturn',
 	#superclass : 'EchoDivergence',
-	#category : 'Echo-Core',
+	#category : 'Echo-Model',
 	#package : 'Echo',
-	#tag : 'Core'
+	#tag : 'Model'
 }
 
 { #category : 'accessing' }

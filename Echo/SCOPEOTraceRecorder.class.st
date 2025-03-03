@@ -1,9 +1,9 @@
 Class {
 	#name : 'SCOPEOTraceRecorder',
 	#superclass : 'EchoTraceRecorder',
-	#category : 'Echo-Core',
+	#category : 'Echo-Model',
 	#package : 'Echo',
-	#tag : 'Core'
+	#tag : 'Model'
 }
 
 { #category : 'executing' }

@@ -10,9 +10,9 @@ Class {
 		'modifiedTrace',
 		'packages'
 	],
-	#category : 'Echo-Core',
+	#category : 'Echo-Model',
 	#package : 'Echo',
-	#tag : 'Core'
+	#tag : 'Model'
 }
 
 { #category : 'as yet unclassified' }

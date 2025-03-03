@@ -28,11 +28,8 @@ Echo >> analyse [
 { #category : 'executing' }
 Echo >> execute [
 
-
-	| programmState   |
-
-"	1halt."
-	"programmState := EchoCollectionState new.
+	 | analyse |
+	 "	1halt.""programmState := EchoCollectionState new.
 	originalInterpreter := DASTInterpreter new.
 	originalInterpreter initializeWithProgram: ((RBParser parseExpression: original)).
 	modifiedInterpreter := DASTInterpreter new.
@@ -44,12 +41,17 @@ Echo >> execute [
 	1 haltIf: [ originalInterpreter programCounter = 600000 ].
 	self step.
 	programmState collect]."
-	recorder := SCOPEOTraceRecorder original: original modified: modified.
-	recorder packages: packages .
-	recorder execute.
-	^ self analyse
-
-
+	 recorder := SCOPEOTraceRecorder
+		             original: original
+		             modified: modified.
+	 recorder packages: packages.
+	 recorder execute.
+	 analyse := self analyse.
+	 ^ EchoResult new
+		   referenceStack: analyse first;
+		   modifiedStack: analyse second;
+		   divergences: analyse last;
+		   yourself
 ]
 
 { #category : 'as yet unclassified' }
