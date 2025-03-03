@@ -9,9 +9,9 @@ Class {
 		'flow',
 		'state'
 	],
-	#category : 'Echo-Core',
+	#category : 'Echo-Model',
 	#package : 'Echo',
-	#tag : 'Core'
+	#tag : 'Model'
 }
 
 { #category : 'as yet unclassified' }
@@ -23,6 +23,12 @@ EchoDivergenceAssign class >> reference: ref modified: mod flow: flow state: sta
 		  flow: flow;
 		  state: state;
 		  yourself
+]
+
+{ #category : 'accessing' }
+EchoDivergenceAssign >> description [
+
+	^ 'Divergence on State : ', reference object name , ' for variable ' ,reference variable name.
 ]
 
 { #category : 'accessing' }
@@ -42,17 +48,23 @@ EchoDivergenceAssign >> icon [
 	^Smalltalk ui iconNamed: #instVarsSelected
 ]
 
+{ #category : 'testing' }
+EchoDivergenceAssign >> isAssignment [ 
+
+	^ true
+]
+
 { #category : 'printing' }
 EchoDivergenceAssign >> printBadState: str [ 
 
 str space.
-		str << reference node variable printString.
+		str << reference variable printString.
 		str << ': '.
-		str << reference node value printString.
+		str << reference value printString.
 		str << ' <--> '.
-		str << modified node variable printString.
+		str << modified variable printString.
 		str << ': '.
-		str << modified node value printString.
+		str << modified value printString.
 	
 ]
 
@@ -60,7 +72,7 @@ str space.
 EchoDivergenceAssign >> printGoodState: str [
 
 	str space.
-	str << reference node variable printString.
+	str << reference variable printString.
 	str << ': '.
 	str << ' Good State '.
 	str << ' Bad Flow'

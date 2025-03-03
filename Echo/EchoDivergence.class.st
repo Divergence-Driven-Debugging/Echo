@@ -13,9 +13,9 @@ Class {
 		'modified',
 		'shift'
 	],
-	#category : 'Echo-Core',
+	#category : 'Echo-Model',
 	#package : 'Echo',
-	#tag : 'Core'
+	#tag : 'Model'
 }
 
 { #category : 'instance creation' }
@@ -34,8 +34,16 @@ EchoDivergence class >> reference: ref modified: mod shift: shift [
 ]
 
 { #category : 'accessing' }
+EchoDivergence >> description [ 
+	
+
+	self shouldBeImplemented 
+]
+
+{ #category : 'accessing' }
 EchoDivergence >> icon [
-	^self subclassResponsibility 
+
+	 self shouldBeImplemented
 ]
 
 { #category : 'initialization' }
@@ -43,6 +51,18 @@ EchoDivergence >> initialize [
 
 	reference := EchoMissingTrace new.
 	modified := EchoMissingTrace  new.
+]
+
+{ #category : 'testing' }
+EchoDivergence >> isAssignment [
+
+	 ^ false
+]
+
+{ #category : 'testing' }
+EchoDivergence >> isMessage [ 
+
+	 ^ false
 ]
 
 { #category : 'accessing' }
