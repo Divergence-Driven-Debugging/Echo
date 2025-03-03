@@ -1,13 +1,25 @@
 Class {
 	#name : 'EchoMissingTrace',
 	#superclass : 'Object',
-	#category : 'Echo-Core',
+	#category : 'Echo-Model',
 	#package : 'Echo',
-	#tag : 'Core'
+	#tag : 'Model'
 }
 
 { #category : 'reflective operations' }
 EchoMissingTrace >> doesNotUnderstand: aMessage [
 
 	^ false
+]
+
+{ #category : 'accessing' }
+EchoMissingTrace >> position [
+
+	 ^ -1
+]
+
+{ #category : 'accessing' }
+EchoMissingTrace >> variable [ 
+
+	^ self
 ]
