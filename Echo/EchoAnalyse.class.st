@@ -12,8 +12,8 @@ EchoAnalyse >> analyseDiv: recorder [
 	| asDiv messageDiv result |
 
 	result := OrderedCollection new.
-	asDiv := self assignementDiv:recorder.
 	messageDiv := self messageDiv:recorder .
+	asDiv := self assignementDiv:recorder.
 	"creationInstanceDiv := self creationInstanceDiv: programmState."
 	result addAll: messageDiv .
 	result addAll: asDiv .
@@ -65,6 +65,13 @@ EchoAnalyse >> checkContentMessage: assGood modified: assBad [
 ]
 
 { #category : 'as yet unclassified' }
+EchoAnalyse >> checkDnuOriginal: assGood modified: assBad [
+
+
+	^ (assGood isDnu xor: [ assBad isDnu ]) not 
+]
+
+{ #category : 'as yet unclassified' }
 EchoAnalyse >> checkFlowOriginal:assGood modified:assBad shift: aShift [
 
 	^ assGood position - (assBad position) - aShift = 0
@@ -73,13 +80,13 @@ EchoAnalyse >> checkFlowOriginal:assGood modified:assBad shift: aShift [
 { #category : 'as yet unclassified' }
 EchoAnalyse >> checkMessageOriginal: assGood modified: assBad [
 
-	^ self checkContentMessage: assGood modified: assBad
+	^ (self checkDnuOriginal: assGood modified: assBad) and: [self checkContentMessage: assGood modified: assBad]
 ]
 
 { #category : 'as yet unclassified' }
 EchoAnalyse >> checkMessageOriginal: assGood modified: assBad shift: aShift [
 
-	^ (self checkContentMessage: assGood modified: assBad) and:[self checkFlowOriginal:assGood modified:assBad shift: aShift ]
+	^ (self checkDnuOriginal: assGood modified: assBad) and:[(self checkContentMessage: assGood modified: assBad) and:[self checkFlowOriginal:assGood modified:assBad shift: aShift ]]
 ]
 
 { #category : 'as yet unclassified' }
@@ -163,7 +170,7 @@ EchoAnalyse >> divergenceConvergenceGood: solveGood modified: solveBad result: r
 	 | size assGood assBad r1 reconvGood reconvBad collectGood collectBad shift |
 	 size := solveGood size max: solveBad size.
 
-	 [ solveGood isNotEmpty and: [ solveBad isNotEmpty ] ] whileTrue: [
+	 [ solveGood isNotEmpty or: [ solveBad isNotEmpty ] ] whileTrue: [
 		 assGood := solveGood at: 1 ifAbsent: [ EchoMissingTrace new ].
 		 assBad := solveBad at: 1 ifAbsent: [ EchoMissingTrace new ].
 		 (self
@@ -182,13 +189,13 @@ EchoAnalyse >> divergenceConvergenceGood: solveGood modified: solveBad result: r
 					       modified: assBad
 					       shift: shift.
 				 reconvGood := solveGood select: [ :d |
-					               self checkMessageOriginal: d modified: assBad ].
+					               (self checkMessageOriginal: d modified: assBad) ifTrue: [ 1halt. true ] ifFalse: false ].
 
 				 reconvGood ifNotEmpty: [
 					 reconvGood do: [ :d | solveGood remove: d ] ].
 
 				 reconvBad := solveBad select: [ :d |
-					              self checkMessageOriginal: assGood modified: d ].
+					             ( self checkMessageOriginal: assGood modified: d) ifTrue: [ 1halt. true ] ifFalse: false ].
 				 reconvBad ifNotEmpty: [
 					 reconvBad do: [ :d | solveBad remove: d ] ].
 

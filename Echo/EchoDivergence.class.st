@@ -11,7 +11,9 @@ Class {
 	#instVars : [
 		'reference',
 		'modified',
-		'shift'
+		'shift',
+		'isLinkedToOtherDiv',
+		'linkedDivergence'
 	],
 	#category : 'Echo-Model',
 	#package : 'Echo',
@@ -49,8 +51,8 @@ EchoDivergence >> icon [
 { #category : 'initialization' }
 EchoDivergence >> initialize [ 
 
-	reference := EchoMissingTrace new.
-	modified := EchoMissingTrace  new.
+	isLinkedToOtherDiv := false.
+	linkedDivergence := OrderedCollection new
 ]
 
 { #category : 'testing' }
@@ -59,10 +61,34 @@ EchoDivergence >> isAssignment [
 	 ^ false
 ]
 
+{ #category : 'accessing' }
+EchoDivergence >> isLinkedToOtherDiv [
+
+	^ isLinkedToOtherDiv
+]
+
+{ #category : 'accessing' }
+EchoDivergence >> isLinkedToOtherDiv: anObject [
+
+	isLinkedToOtherDiv := anObject
+]
+
 { #category : 'testing' }
 EchoDivergence >> isMessage [ 
 
 	 ^ false
+]
+
+{ #category : 'accessing' }
+EchoDivergence >> linkedDivergence [
+
+	^ linkedDivergence
+]
+
+{ #category : 'accessing' }
+EchoDivergence >> linkedDivergence: anObject [
+
+	linkedDivergence := anObject
 ]
 
 { #category : 'accessing' }
@@ -131,4 +157,28 @@ EchoDivergence >> shift: anObject [
 	shift := anObject .
 	shift ifNil: [ shift := 0 ]
 	
+]
+
+{ #category : 'accessing' }
+EchoDivergence >> startPositionModified [ 
+
+	self shouldBeImplemented 
+]
+
+{ #category : 'accessing' }
+EchoDivergence >> startPositionReference [ 
+
+	self shouldBeImplemented 
+]
+
+{ #category : 'accessing' }
+EchoDivergence >> stopPositionModified [ 
+
+	self shouldBeImplemented 
+]
+
+{ #category : 'accessing' }
+EchoDivergence >> stopPositionReference [
+
+	self shouldBeImplemented 
 ]

@@ -22,7 +22,7 @@ EchoTest >> testDivergenceOnAssignement [
 	1halt.
 	
 	"oui il y a deux divergence car le sucre ne converge pas, mais je ne pense pas que ce soit logique "
-	self assert: execute last size equals: 2
+	self assert: execute divergences size equals: 2
 ]
 
 { #category : 'tests' }
@@ -40,7 +40,7 @@ EchoTest >> testDivergenceOnAssignementWithFlow [
 	
 	1halt. 
 	"oui 3 car le dnu nést pas capter par scopeo pour línstant"
-	self assert: execute last size equals: 3
+	self assert: execute divergences size equals: 3
 ]
 
 { #category : 'tests' }
@@ -53,7 +53,7 @@ EchoTest >> testDivergenceOnflow [
 	echo modified: [Candy_echo new cake].
 
 	execute := echo execute.
-	self assert: execute last size equals: 1
+	self assert: execute divergences size equals: 1
 ]
 
 { #category : 'tests' }
@@ -68,7 +68,7 @@ EchoTest >> testGoodCollectOfProgramState [
 
 
 	execute := echo execute.
-	self assert: execute first size equals: execute second size
+	self assert: execute referenceStack size equals: execute modifiedStack size
 ]
 
 { #category : 'tests' }
@@ -81,5 +81,5 @@ EchoTest >> testReconvergemceOnflow [
 	echo modified: [Candy_echo new chocoGuimmauve ].
 
 	execute := echo execute.
-	self assert: execute last size equals: 5
+	self assert: execute divergences size equals: 5
 ]

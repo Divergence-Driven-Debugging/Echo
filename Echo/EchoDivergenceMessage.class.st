@@ -7,8 +7,7 @@ Class {
 	#superclass : 'EchoDivergence',
 	#instVars : [
 		'collectGood',
-		'collectBad',
-		'linkedDivergence'
+		'collectBad'
 	],
 	#category : 'Echo-Model',
 	#package : 'Echo',
@@ -51,29 +50,10 @@ EchoDivergenceMessage >> icon [
 	^Smalltalk ui iconNamed: #publish
 ]
 
-{ #category : 'initialization' }
-EchoDivergenceMessage >> initialize [
-
-	 super initialize.
-	 linkedDivergence := OrderedCollection new
-]
-
 { #category : 'testing' }
 EchoDivergenceMessage >> isMessage [ 
 
 	^ true 
-]
-
-{ #category : 'accessing' }
-EchoDivergenceMessage >> linkedDivergence [
-
-	^ linkedDivergence
-]
-
-{ #category : 'accessing' }
-EchoDivergenceMessage >> linkedDivergence: anObject [
-
-	linkedDivergence := anObject
 ]
 
 { #category : 'printing' }
@@ -98,4 +78,32 @@ EchoDivergenceMessage >> selectItem: modifiedStack [
 	^ (modifiedStack items select: [ :s |
 		   s programCounter = (self modified programCounter + self shift) ])
 		  first
+]
+
+{ #category : 'accessing' }
+EchoDivergenceMessage >> startPositionModified [
+
+
+  ^ modified position 
+]
+
+{ #category : 'accessing' }
+EchoDivergenceMessage >> startPositionReference [
+
+
+  ^ reference position 
+]
+
+{ #category : 'accessing' }
+EchoDivergenceMessage >> stopPositionModified [
+
+
+  ^self startPositionModified max: (collectBad atLast: 1 ifAbsent: EchoMissingTrace new) position
+]
+
+{ #category : 'accessing' }
+EchoDivergenceMessage >> stopPositionReference [
+
+
+  ^self startPositionReference max: (collectGood atLast: 1 ifAbsent: EchoMissingTrace new) position
 ]

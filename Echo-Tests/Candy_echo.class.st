@@ -57,3 +57,15 @@ Candy_echo >> sugar [
 	
 	sugar := 2.
 ]
+
+{ #category : 'as yet unclassified' }
+Candy_echo >> testwee [
+
+	sugar := 4.
+]
+
+{ #category : 'as yet unclassified' }
+Candy_echo >> testwee2 [
+
+	sugar := 5.
+]

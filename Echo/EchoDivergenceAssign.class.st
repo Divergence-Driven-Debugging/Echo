@@ -93,6 +93,18 @@ EchoDivergenceAssign >> selectItem:modifiedStack [
 ]
 
 { #category : 'accessing' }
+EchoDivergenceAssign >> startPositionModified [
+
+	^ modified position
+]
+
+{ #category : 'accessing' }
+EchoDivergenceAssign >> startPositionReference [
+
+	^ reference position
+]
+
+{ #category : 'accessing' }
 EchoDivergenceAssign >> state [
 
 	^ state
@@ -102,4 +114,16 @@ EchoDivergenceAssign >> state [
 EchoDivergenceAssign >> state: anObject [
 
 	state := anObject
+]
+
+{ #category : 'accessing' }
+EchoDivergenceAssign >> stopPositionModified [
+
+	^ modified position 
+]
+
+{ #category : 'accessing' }
+EchoDivergenceAssign >> stopPositionReference [ 
+
+	^ reference position
 ]

@@ -24,6 +24,12 @@ EchoResult >> divergences: anObject [
 	self linkedDivergence
 ]
 
+{ #category : 'accessing' }
+EchoResult >> headDivergence [
+
+  ^ divergences reject: [ :d | d isLinkedToOtherDiv ]
+]
+
 { #category : 'initialization' }
 EchoResult >> iconForDivergence: aDivergence [
 
@@ -33,7 +39,7 @@ EchoResult >> iconForDivergence: aDivergence [
 { #category : 'accessing' }
 EchoResult >> linkedDivergence [
 
-	| listOfMessage listOfAssigne candidate |
+	| listOfMessage listOfAssigne  |
 	self flag: 'attention si dnu et pas de message a gauche dans un setteur on ped línfo '.
 	listOfMessage := divergences select: [ :d | d isMessage ].
 	listOfAssigne := divergences select: [ :d | d isAssignment ].
@@ -42,11 +48,13 @@ EchoResult >> linkedDivergence [
 	
 	listOfMessage do: [ :m | m linkedDivergence addAll: (listOfAssigne select: [ :a |
 	 a reference position > m reference position and: [
-		 a reference position < ((m collectGood atLast: 1 ifAbsent: ( EchoMissingTrace new )) position) ] ])].
+		 a reference position < ((m collectGood atLast: 1 ifAbsent: ( EchoMissingTrace new )) position) ] ]). m linkedDivergence do: [:d | d isLinkedToOtherDiv: true]].
 
 	listOfMessage do: [ :m | m linkedDivergence addAll: (listOfAssigne select: [ :a |
 	 a modified position > m modified position and: [
-		 a modified position < ((m collectBad atLast: 1 ifAbsent: ( EchoMissingTrace new )) position )] ])]
+		 a modified position < ((m collectBad atLast: 1 ifAbsent: ( EchoMissingTrace new )) position )] ]). m linkedDivergence do: [:d | d isLinkedToOtherDiv: true]]
+
+
 	
 ]
 
@@ -91,14 +99,29 @@ EchoResult >> updateCode: code with: trace [
 			  yourself)
 ]
 
-{ #category : 'as yet unclassified' }
-EchoResult >> updateModifiedStack: modifiedStack whiteDiv: div [
+{ #category : 'api - events' }
+EchoResult >> updateModifiedStack: stackPresenter whiteDiv: div [
 
-1haltOnce.
+  | start stop |
+
+  start := div startPositionModified .
+  stop := div stopPositionModified .
+
+  stackPresenter columns first displayColor: [:stack |  (stack position between: start and: stop) ifTrue: [ Color red ] ifFalse: [ Smalltalk ui theme textColor ] ].
+
+  stackPresenter selectIndex: start scrollToSelection: true
 ]
 
-{ #category : 'as yet unclassified' }
-EchoResult >> updateReferenceStack: referenceStack whiteDiv: div [
+{ #category : 'api - events' }
+EchoResult >> updateReferenceStack: stackPresenter whiteDiv: div [
 
-	1haltOnce.
+  | start stop |
+
+
+  start := div startPositionReference .
+  stop := div stopPositionReference .
+
+  stackPresenter columns first displayColor: [:stack |  (stack position between: start and: stop) ifTrue: [ Color red ] ifFalse: [ Smalltalk ui theme textColor ] ].
+
+  stackPresenter selectIndex: start scrollToSelection: true
 ]

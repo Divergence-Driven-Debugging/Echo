@@ -21,11 +21,13 @@ EchoDivergencePresenter >> defaultLayout [
 	 ^ SpBoxLayout newTopToBottom
 		   add: divergenceTable;
 		   add: divergenceLabel expand: false;
-			add: (SpBoxLayout newHorizontal 
+			add: (SpBoxLayout newHorizontal spacing: 5;
+				borderWidth: 5 ;
 				add: referenceStack ;
 				add: modifiedStack ;
 				yourself);
-			add: (SpBoxLayout newHorizontal 
+			add: (SpBoxLayout newHorizontal spacing: 5;
+				borderWidth: 5 ;
 				add: referenceCode ;
 				add: modifiedCode ;
 				yourself);
@@ -46,11 +48,11 @@ EchoDivergencePresenter >> initializeCodePresenter [
 { #category : 'initialization' }
 EchoDivergencePresenter >> initializeDivergenceTable [
 
-	 divergenceTable := self newTable.
+	 "divergenceTable := self newTable."
 	 divergenceLabel := self newLabel.
 
 
-	 divergenceTable
+	 "divergenceTable
 		 addColumn: ((SpImageTableColumn
 				   title: 'Type'
 				   evaluated: [ :elem | elem icon ])
@@ -58,9 +60,27 @@ EchoDivergencePresenter >> initializeDivergenceTable [
 				  yourself);
 		 addColumn: (SpStringTableColumn title: 'description' evaluated: #description);
 		 items: model divergences;
-		 beResizable.
+		 beResizable."
 		
-	self updateStackFromDivergenceEvent.
+	
+	
+
+
+
+
+	divergenceTable := self newTreeTable.
+	divergenceTable	addColumn: ((SpImageTableColumn
+				   title: 'Type'
+				   evaluated: [ :elem | elem icon ])
+				  width: 50;
+				  yourself);
+			addColumn: (SpStringTableColumn evaluated: #description);
+		roots: model headDivergence ;
+		children: [ :div | div linkedDivergence ];
+		beResizable.
+		
+	
+self updateStackFromDivergenceEvent.
 ]
 
 { #category : 'initialization' }
@@ -117,6 +137,15 @@ EchoDivergencePresenter >> setModelBeforeInitialization: aModel [
 	model := aModel 
 ]
 
+{ #category : 'TOREMOVE' }
+EchoDivergencePresenter >> title [
+
+	^ String streamContents: [ :str |
+		  str << model divergences size asString.
+		  str space.
+		  str << 'divergences detected' ]
+]
+
 { #category : 'updating - presenters' }
 EchoDivergencePresenter >> updateCode: code with: trace [
 
@@ -128,7 +157,6 @@ EchoDivergencePresenter >> updateCode: code with: trace [
 { #category : 'initialization' }
 EchoDivergencePresenter >> updateStackFromDivergenceEvent [
 
-	 1 haltOnce.
 
 	 divergenceTable transmitDo: [ :div |
 		 model updateReferenceStack: referenceStack whiteDiv: div.

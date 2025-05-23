@@ -51,3 +51,15 @@ Candy >> sugar [
 	
 	sugar := 3.
 ]
+
+{ #category : 'as yet unclassified' }
+Candy >> testwee [
+
+	sugar := 3.
+]
+
+{ #category : 'as yet unclassified' }
+Candy >> testwee2 [
+
+	sugar := 5.
+]
