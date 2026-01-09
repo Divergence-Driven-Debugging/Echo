@@ -19,7 +19,7 @@ EchoTest >> testDivergenceOnAssignement [
 	echo modified: [Candy_echo new sugar].
 
 	execute := echo execute.
-	1halt.
+
 	
 	"oui il y a deux divergence car le sucre ne converge pas, mais je ne pense pas que ce soit logique "
 	self assert: execute divergences size equals: 2

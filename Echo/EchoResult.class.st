@@ -4,12 +4,27 @@ Class {
 	#instVars : [
 		'divergences',
 		'referenceStack',
-		'modifiedStack'
+		'modifiedStack',
+		'flowDivergences',
+		'assignementDivergences'
 	],
 	#category : 'Echo-Model',
 	#package : 'Echo',
 	#tag : 'Model'
 }
+
+{ #category : 'accesing' }
+EchoResult >> assignementDivergences [
+	
+	^ assignementDivergences 
+]
+
+{ #category : 'as yet unclassified' }
+EchoResult >> assignementDivergences: aDivergence [
+
+
+	assignementDivergences add: aDivergence .
+]
 
 { #category : 'accessing' }
 EchoResult >> divergences [
@@ -24,6 +39,18 @@ EchoResult >> divergences: anObject [
 	self linkedDivergence
 ]
 
+{ #category : 'as yet unclassified' }
+EchoResult >> flowDivergences [
+	
+	^ flowDivergences
+]
+
+{ #category : 'accessing' }
+EchoResult >> flowDivergences: anObject [
+
+	flowDivergences := anObject
+]
+
 { #category : 'accessing' }
 EchoResult >> headDivergence [
 
@@ -34,6 +61,13 @@ EchoResult >> headDivergence [
 EchoResult >> iconForDivergence: aDivergence [
 
 	^ aDivergence icon
+]
+
+{ #category : 'as yet unclassified' }
+EchoResult >> initialize [ 
+
+	assignementDivergences := OrderedCollection new.
+	flowDivergences := OrderedCollection new.
 ]
 
 { #category : 'accessing' }

@@ -3,7 +3,8 @@ Class {
 	#superclass : 'Object',
 	#instVars : [
 		'sugar',
-		'chocolate'
+		'chocolate',
+		'cacao'
 	],
 	#category : 'Echo-Tests-Core',
 	#package : 'Echo-Tests',
@@ -12,6 +13,8 @@ Class {
 
 { #category : 'as yet unclassified' }
 Candy_echo >> cacao [
+
+	cacao := 2.
 ]
 
 { #category : 'as yet unclassified' }
@@ -48,7 +51,7 @@ Candy_echo >> guimmauve [
 { #category : 'searching' }
 Candy_echo >> make [
 
-	self chocolat.
+	self guimmauve .
 	sugar := 4
 ]
 

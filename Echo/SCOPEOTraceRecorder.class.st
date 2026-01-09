@@ -15,8 +15,7 @@ SCOPEOTraceRecorder >> execute [
 	self executeOriginal.
 	self executeModified.
 	"on doit attendre la fin du process de scopeo"
-	1halt.
-	self modifyPosition .
+
 	
 	^ self
 ]
@@ -24,38 +23,25 @@ SCOPEOTraceRecorder >> execute [
 { #category : 'as yet unclassified' }
 SCOPEOTraceRecorder >> executeModified [
 
-	modifiedTrace := modifiedRecorder execution traces.
+	modifiedTrace := modifiedRecorder traces.
 ]
 
 { #category : 'as yet unclassified' }
 SCOPEOTraceRecorder >> executeOriginal [
 
-	originalTrace := originalRecorder execution traces .
+	originalTrace := originalRecorder traces .
 ]
 
 { #category : 'initialization' }
 SCOPEOTraceRecorder >> initializeModifiedRecorder [
 
-	modifiedRecorder := ScpExecutionRecorder new
-		                    recordBlock: modified;
-		                    yourself
+	modifiedRecorder := ScpExecutionRecorder 
+		                    recordBlock: modified as: ScpExecutionRecordList
 ]
 
 { #category : 'initialization' }
 SCOPEOTraceRecorder >> initializeOriginalRecorder [
 
-	originalRecorder := ScpExecutionRecorder new
-		                    recordBlock: original;
-		                    yourself
-]
-
-{ #category : 'as yet unclassified' }
-SCOPEOTraceRecorder >> modifyPosition [
-
-	| position |
-	
-	position := 1.
-	originalTrace do: [ :a | a position: position. position := position + 1  ].
-	position := 1.
-	modifiedTrace do: [ :a | a position: position. position := position + 1  ].
+	originalRecorder := ScpExecutionRecorder 
+		                    recordBlock: original as: ScpExecutionRecordList
 ]

@@ -3,7 +3,8 @@ Class {
 	#superclass : 'Object',
 	#instVars : [
 		'sugar',
-		'chocolate'
+		'chocolate',
+		'cacao'
 	],
 	#category : 'Echo-Tests-Core',
 	#package : 'Echo-Tests',
@@ -12,6 +13,8 @@ Class {
 
 { #category : 'as yet unclassified' }
 Candy >> cacao [ 
+
+	cacao := 2.
 ]
 
 { #category : 'as yet unclassified' }
@@ -50,6 +53,12 @@ Candy >> make [
 Candy >> sugar [
 	
 	sugar := 3.
+]
+
+{ #category : 'accessing' }
+Candy >> sugar1 [
+	
+	sugar := 2.
 ]
 
 { #category : 'as yet unclassified' }
