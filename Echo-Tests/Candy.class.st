@@ -18,6 +18,12 @@ Candy >> cacao [
 ]
 
 { #category : 'as yet unclassified' }
+Candy >> cacao: aNumber [
+
+	cacao := aNumber.
+]
+
+{ #category : 'as yet unclassified' }
 Candy >> cake [
 
 	self cacao

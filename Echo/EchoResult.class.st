@@ -39,6 +39,24 @@ EchoResult >> divergences: anObject [
 	self linkedDivergence
 ]
 
+{ #category : 'accessing' }
+EchoResult >> firstDivergences [ 
+
+"return the first divergence in the program, they can be states or flow"
+]
+
+{ #category : 'accessing' }
+EchoResult >> firstFlowDivergences [ 
+
+"return the first flow divergence in the program"
+]
+
+{ #category : 'accessing' }
+EchoResult >> firstStateDivergences [ 
+
+"return the first state divergence in the program"
+]
+
 { #category : 'as yet unclassified' }
 EchoResult >> flowDivergences [
 	
