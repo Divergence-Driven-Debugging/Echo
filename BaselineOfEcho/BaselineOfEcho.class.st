@@ -21,6 +21,8 @@ BaselineOfEcho >> dependencies: spec [
 	spec baseline: 'DeepComparator' with: [
 		spec repository: 'github://Modest-Project/DeepComparator:main' 
 	].
+	spec baseline: 'Scopeo' with: [ 
+		spec repository: 'github://scopeo-project/scopeo:main' ]
 ]
 
 { #category : 'baselines' }
