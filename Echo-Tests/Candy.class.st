@@ -1,0 +1,80 @@
+Class {
+	#name : 'Candy',
+	#superclass : 'Object',
+	#instVars : [
+		'sugar',
+		'chocolate',
+		'cacao'
+	],
+	#category : 'Echo-Tests-Core',
+	#package : 'Echo-Tests',
+	#tag : 'Core'
+}
+
+{ #category : 'as yet unclassified' }
+Candy >> cacao [ 
+
+	cacao := 2.
+]
+
+{ #category : 'as yet unclassified' }
+Candy >> cacao: aNumber [
+
+	cacao := aNumber.
+]
+
+{ #category : 'as yet unclassified' }
+Candy >> cake [
+
+	self cacao
+]
+
+{ #category : 'as yet unclassified' }
+Candy >> chocoGuimmauve [
+
+	self chocolat .
+	self guimmauve 
+]
+
+{ #category : 'as yet unclassified' }
+Candy >> chocolat [
+
+	chocolate := 5
+]
+
+{ #category : 'as yet unclassified' }
+Candy >> guimmauve [
+
+	self sugar.
+]
+
+{ #category : 'as yet unclassified' }
+Candy >> make [
+
+	self chocolat.
+	sugar := 4
+]
+
+{ #category : 'accessing' }
+Candy >> sugar [
+	
+	sugar := 3.
+]
+
+{ #category : 'accessing' }
+Candy >> sugar1 [
+	
+	sugar := 2.
+]
+
+{ #category : 'as yet unclassified' }
+Candy >> testwee [
+
+	sugar := 3.
+]
+
+{ #category : 'as yet unclassified' }
+Candy >> testwee2 [
+
+	sugar := 5.
+]
