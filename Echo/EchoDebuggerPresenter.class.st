@@ -130,7 +130,7 @@ EchoDebuggerPresenter >> initializeDivergenceTable [
 { #category : 'initialization' }
 EchoDebuggerPresenter >> initializeEventsBetweenStack: stack andCode: code [
 
-	stack transmitDo: [ :programState |
+stack transmitDo: [ :programState |
 		programState ifNotNil: [ self updateCode: code with: programState ] ].
 ]
 

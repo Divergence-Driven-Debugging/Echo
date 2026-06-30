@@ -42,7 +42,7 @@ EchoDivergenceMessage >> collectGood: aCollection [
 { #category : 'accessing' }
 EchoDivergenceMessage >> description [
 	
-	^ 'Divergence on Flow : reference execution send  #', reference selector , ' modified send #', modified selector 
+	^ 'Divergence on Flow : reference execution send  #', reference node name , ' modified send #', modified node name 
 ]
 
 { #category : 'accessing' }
@@ -61,9 +61,8 @@ EchoDivergenceMessage >> printOn: str [
 
 		str << '[Message] '.
 		str space.
-		str << reference selector.
 		str << ' <-> '.
-		str << modified selector.
+		str << self description .
 		^ self .
 
 

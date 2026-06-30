@@ -1,6 +1,10 @@
 Class {
 	#name : 'EchoAnalyse',
 	#superclass : 'Object',
+	#instVars : [
+		'originHistory',
+		'modifiedHistory'
+	],
 	#category : 'Echo-Core',
 	#package : 'Echo',
 	#tag : 'Core'
@@ -12,7 +16,7 @@ EchoAnalyse >> analyseDiv: recorder [
 	| asDiv messageDiv div |
 
 	div := EchoResult new.
-	messageDiv := self messageDiv:recorder .
+	"messageDiv := self messageDiv:recorder ."
 	asDiv := self assignementDiv:recorder.
 	"creationInstanceDiv := self creationInstanceDiv: programmState."   
 	div assignementDivergences addAll: asDiv  .
@@ -23,27 +27,26 @@ EchoAnalyse >> analyseDiv: recorder [
 { #category : 'as yet unclassified' }
 EchoAnalyse >> assignementDiv: recorder [
 
-	| originalState modifiedState solveGood ttqBad modifiedSolve r  |
-
-	solveGood := recorder originalTrace  select: [ :t | t isAssignment] .
-
-	modifiedSolve := recorder modifiedTrace select: [ :t | t isAssignment ] .
-	
-	
+	| originalState modifiedState solveGood ttqBad modifiedSolve r |
 	r := OrderedCollection new.
-	
-	^ self divergenceAssignementGood: solveGood modified: modifiedSolve result: r shift: 0.
-	
 
+	^ self
+		  divergenceAssignementGood: recorder originalTrace
+		  modified: recorder modifiedTrace
+		  result: r
+		  shift: 0
 ]
 
 { #category : 'alg' }
 EchoAnalyse >> assignementEquivalent: aTraceOrigin modified: aTraceModified divergences: divergences [
 	
-	| sameState |
+	| sameState origineObject modifiedObject |
+	1halt.
+	origineObject:= (originHistory at: (aTraceOrigin object at: 'hash')) recreateAt: aTraceOrigin timestamp.
+	modifiedObject:= (modifiedHistory at: (aTraceModified object at: 'hash')) recreateAt: aTraceModified timestamp.
 	sameState := (DeepComparator new
-										assert: aTraceOrigin object
-										deepEquals: aTraceModified object).
+										assert: origineObject
+										deepEquals: modifiedObject).
 	
 	sameState  ifTrue: [ ^nil ].
 	divergences add: (EchoDivergenceAssign  reference: aTraceOrigin 
@@ -62,25 +65,30 @@ EchoAnalyse >> divergenceAssignementGood: solveGood modified: solveBad result: r
 	[solveGood size ~=  (cmpO - 1) and: [ solveBad size ~= (cmpO-1) ]] whileTrue: [ 
 		assO := solveGood at: cmpO .
 		assM := solveBad at: cmpM.
+		assO isAssignment ifTrue:[
 		(self assignementEquivalent: assO  modified: assM divergences: result).
 		cmpO := cmpO + 1.
-		cmpM := cmpM + 1.
+		cmpM := cmpM + 1.]
+		ifFalse: [ self divergenceAssignementGood: assO children modified: assM children result: result shift: baseShift .
+			cmpO := cmpO + 1.
+		cmpM := cmpM + 1.]
 		 ].
 	^ result
 ]
 
 { #category : 'as yet unclassified' }
-EchoAnalyse >> divergenceConvergenceGood: solveGood modified: solveBad result: result [ 
+EchoAnalyse >> divergenceConvergenceGood: solveGood modified: solveBad result: result [
+
 	| cmpO cmpM result messO messM |
 	cmpO := 1.
 	cmpM := 1.
-	[solveGood size ~=  (cmpO - 1) and: [ solveBad size ~= (cmpO-1) ]] whileTrue: [ 
-		messO := solveGood at: cmpO .
-		messM := solveBad at: cmpM.
-		self method:messO isSame: messM divergences: result.
-		cmpO := cmpO + 1.
-		cmpM := cmpM + 1.
-		 ].
+	[ solveGood size ~= (cmpO - 1) and: [ solveBad size ~= (cmpO - 1) ] ]
+		whileTrue: [
+			messO := solveGood at: cmpO.
+			messM := solveBad at: cmpM.
+			self method: messO isSame: messM divergences: result.
+			cmpO := cmpO + 1.
+			cmpM := cmpM + 1 ].
 	^ result
 ]
 
@@ -103,12 +111,54 @@ EchoAnalyse >> messageDiv: recorder [
 ]
 
 { #category : 'algo' }
+EchoAnalyse >> method: messO isSame: messM [
+
+	| methodEquivalent argumentsIsSame methodIsSame senderIsSame receiverIsSame |
+	methodIsSame := messO node name = messM node name.
+	argumentsIsSame := messO arguments = messM arguments.
+	senderIsSame := messO sender
+		                isEquivalentTo: messM sender
+		                timeStampO: messO timestamp
+		                timeStampM: messM timestamp.
+	receiverIsSame := messO object
+		                  isEquivalentTo: messM object
+		                  timeStampO: messO timestamp
+		                  timeStampM: messM timestamp.
+
+	methodEquivalent := methodIsSame and: [
+		                    argumentsIsSame and: [
+			                    senderIsSame and: [ receiverIsSame ] ] ].
+
+	^ methodEquivalent
+]
+
+{ #category : 'algo' }
 EchoAnalyse >> method: messO isSame: messM divergences: aCollection [ 
 	
 	| methodEquivalent |
-	
-	methodEquivalent := (messO = messM).
 
-	methodEquivalent ifTrue: [ ^ nil ].
-	aCollection add: (EchoDivergenceMessage reference: messO modified: messM )
+	methodEquivalent := self method: messO isSame: messM .
+
+	methodEquivalent ifTrue: [ ^ true ].
+	aCollection add: (EchoDivergenceMessage reference: messO modified: messM ).
+	^ false
+]
+
+{ #category : 'setter' }
+EchoAnalyse >> objectHistoryOrigin: origin modified: modified [ 
+	
+	originHistory := origin .
+	modifiedHistory := modified.
+]
+
+{ #category : 'algo' }
+EchoAnalyse >> reconvergeOnaPoint: aScpMethodTrace onTheOtherVersion: aCollection [
+
+| reconvPoint |
+		1halt.
+	reconvPoint := aCollection select: [ :e |
+		self method: aScpMethodTrace isSame: e ].
+	reconvPoint ifEmpty: [ "never reconvergences"  ^nil].
+
+	
 ]

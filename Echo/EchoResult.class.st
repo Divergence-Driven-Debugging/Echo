@@ -6,12 +6,26 @@ Class {
 		'referenceStack',
 		'modifiedStack',
 		'flowDivergences',
-		'assignementDivergences'
+		'assignementDivergences',
+		'query'
 	],
 	#category : 'Echo-Model',
 	#package : 'Echo',
 	#tag : 'Model'
 }
+
+{ #category : 'adding' }
+EchoResult >> addQuery [ 
+
+
+	query add: EchoQuery new.
+]
+
+{ #category : 'adding' }
+EchoResult >> addQuery: aQuery [
+
+	query add: aQuery
+]
 
 { #category : 'accesing' }
 EchoResult >> assignementDivergences [
@@ -24,6 +38,19 @@ EchoResult >> assignementDivergences: aDivergence [
 
 
 	assignementDivergences add: aDivergence .
+]
+
+{ #category : 'as yet unclassified' }
+EchoResult >> availableProperties [
+	
+	^ { 'object'. 'method' . 'assignement' }
+]
+
+{ #category : 'adding' }
+EchoResult >> clearQuery [ 
+
+
+	query removeAll .
 ]
 
 { #category : 'accessing' }
@@ -40,21 +67,24 @@ EchoResult >> divergences: anObject [
 ]
 
 { #category : 'accessing' }
-EchoResult >> firstDivergences [ 
+EchoResult >> firstDivergences [
+	"return the first divergence in the program, they can be states or flow"
 
-"return the first divergence in the program, they can be states or flow"
+	^ self headDivergence
 ]
 
 { #category : 'accessing' }
-EchoResult >> firstFlowDivergences [ 
+EchoResult >> firstFlowDivergences [
+	"return the first flow divergence in the program"
 
-"return the first flow divergence in the program"
+	^ self flowDivergences first
 ]
 
 { #category : 'accessing' }
-EchoResult >> firstStateDivergences [ 
+EchoResult >> firstStateDivergences [
+	"return the first state divergence in the program"
 
-"return the first state divergence in the program"
+	^ self assignementDivergences first
 ]
 
 { #category : 'as yet unclassified' }
@@ -75,17 +105,12 @@ EchoResult >> headDivergence [
   ^ divergences reject: [ :d | d isLinkedToOtherDiv ]
 ]
 
-{ #category : 'initialization' }
-EchoResult >> iconForDivergence: aDivergence [
-
-	^ aDivergence icon
-]
-
 { #category : 'as yet unclassified' }
 EchoResult >> initialize [ 
 
 	assignementDivergences := OrderedCollection new.
 	flowDivergences := OrderedCollection new.
+	query := OrderedCollection new.
 ]
 
 { #category : 'accessing' }
@@ -123,6 +148,18 @@ EchoResult >> modifiedStack: anObject [
 ]
 
 { #category : 'accessing' }
+EchoResult >> query [
+
+	^ query
+]
+
+{ #category : 'accessing' }
+EchoResult >> query: anObject [
+
+	query := anObject
+]
+
+{ #category : 'accessing' }
 EchoResult >> referenceStack [
 
 	^ referenceStack
@@ -134,46 +171,9 @@ EchoResult >> referenceStack: anObject [
 	referenceStack := anObject
 ]
 
-{ #category : 'initialization' }
-EchoResult >> updateCode: code with: trace [
+{ #category : 'accessing' }
+EchoResult >> updateDivergence [
 
-	 self flag: 'why +1 pour le stop'.
-
-	 code beForMethod: trace node methodNode compiledMethod.
-	 code text: trace node methodNode sourceCode.
-	 code removeAllTextSegmentDecorations.
-	 code clearSelection.
-
-
-	 code addTextSegmentDecoration:
-		 (SpTextPresenterDecorator forHighlight
-			  interval: (trace node start to: trace node stop + 1);
-			  yourself)
-]
-
-{ #category : 'api - events' }
-EchoResult >> updateModifiedStack: stackPresenter whiteDiv: div [
-
-  | start stop |
-
-  start := div startPositionModified .
-  stop := div stopPositionModified .
-
-  stackPresenter columns first displayColor: [:stack |  (stack position between: start and: stop) ifTrue: [ Color red ] ifFalse: [ Smalltalk ui theme textColor ] ].
-
-  stackPresenter selectIndex: start scrollToSelection: true
-]
-
-{ #category : 'api - events' }
-EchoResult >> updateReferenceStack: stackPresenter whiteDiv: div [
-
-  | start stop |
-
-
-  start := div startPositionReference .
-  stop := div stopPositionReference .
-
-  stackPresenter columns first displayColor: [:stack |  (stack position between: start and: stop) ifTrue: [ Color red ] ifFalse: [ Smalltalk ui theme textColor ] ].
-
-  stackPresenter selectIndex: start scrollToSelection: true
+	divergences := OrderedCollection new.
+	divergences := divergences , self assignementDivergences , self flowDivergences .
 ]

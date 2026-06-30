@@ -74,8 +74,8 @@ EchoDivergenceAssign >> printGoodState: str [
 	str space.
 	str << reference variable printString.
 	str << ': '.
-	str << ' Good State '.
-	str << ' Bad Flow'
+	str	<< ', ' << (reference stringFor: [ reference oldValue ] withDefault: 'unknown old-value')  
+		<< ', ' << (reference stringFor: [reference newValue ] withDefault: 'unknown new-value')
 ]
 
 { #category : 'printing' }
